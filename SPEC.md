@@ -101,7 +101,7 @@ type Transaction = {
   category: string;
   date: string;
   description: string;
-  type: 'income' | 'expense';
+  type: "income" | "expense";
   createdAt: string;
   updatedAt: string;
 };
@@ -125,7 +125,7 @@ type Budget = {
   id: string;
   categoryId: string;
   limit: number;
-  period: 'monthly';
+  period: "monthly";
 };
 ```
 
@@ -149,9 +149,7 @@ POST   /budgets
 ### Response Format
 
 ```ts
-type ApiResponse<T> =
-  | { ok: true; data: T }
-  | { ok: false; error: string };
+type ApiResponse<T> = { ok: true; data: T } | { ok: false; error: string };
 ```
 
 ## 7. State Management
