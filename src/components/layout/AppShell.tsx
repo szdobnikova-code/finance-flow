@@ -8,7 +8,7 @@ export default function AppShell() {
       <Navbar />
 
       <main className="min-w-0 flex-1">
-        <div className="w-full max-w-5xl px-10 py-10">
+        <div className="w-full px-10 py-10">
           <Outlet />
         </div>
       </main>

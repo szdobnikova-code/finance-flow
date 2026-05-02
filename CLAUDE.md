@@ -4,9 +4,9 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project context
 
-`finance-flow` is a portfolio-grade Personal Finance Dashboard SPA. The full design contract lives in [SPEC.md](./SPEC.md) — treat it as the source of truth for data model, routes, endpoints, features, and the performance story (10k transactions, virtualization, code-splitting, Lighthouse before/after in `docs/`). When the spec and existing code disagree, the spec wins unless the user says otherwise.
+`finance-flow` is a portfolio-grade Personal Finance Dashboard SPA. Goals: handle 10,000+ transactions with smooth performance, demonstrate measurable Lighthouse improvements, showcase modern React 19 + TypeScript stack. The app is frontend-only with a mock API (MSW) — no real backend, no authentication, no multi-user support.
 
-The repo is in **early scaffolding**: dependencies are installed and shadcn is wired up, but `src/App.tsx` is still the Vite starter and most of the directories described in the spec (`api/`, `hooks/`, `pages/`, `store/`, `types/`) are empty. New work should follow the spec's architecture rather than extending the placeholder starter UI.
+The repo is in **early scaffolding**: dependencies are installed and shadcn is wired up, but `src/App.tsx` is still the Vite starter and most of the directories (`api/`, `hooks/`, `pages/`, `store/`, `types/`) are empty. New work should follow the architecture below rather than extending the placeholder starter UI.
 
 ## Commands
 
@@ -15,30 +15,59 @@ The repo is in **early scaffolding**: dependencies are installed and shadcn is w
 - `npm run lint` — ESLint over the repo
 - `npm run preview` — preview the production build
 
-There is **no `test` script yet** even though Vitest, RTL, and jsdom are installed. When you add the first test, also add `"test": "vitest"` (and likely `"test:run": "vitest run"`) to `package.json`. Playwright is named in the spec but is not yet a dependency — install and configure it when E2E work actually begins.
+There is **no `test` script yet** even though Vitest, RTL, and jsdom are installed. When you add the first test, also add `"test": "vitest"` (and likely `"test:run": "vitest run"`) to `package.json`. Playwright is planned for E2E but is not yet a dependency — install and configure it when E2E work actually begins.
 
 ## Architecture
 
-The app is frontend-only with a strict separation between server and client state:
+The app is frontend-only with **state strictly separated by concern** — server state, URL state, and local component state each have a single owner. There is no global UI state library by default.
 
 - **Server state → TanStack Query** for transactions, categories, budgets. Query keys follow `['transactions', filters]`. Mutations should use optimistic updates; lists rely on `staleTime` + `select` for memoized projections.
-- **Client/UI state → Zustand** for modals, theme, and any filters not promoted to the URL.
-- **Mock backend → MSW** implements the endpoints in SPEC §6. There is no real API; do not introduce one without updating the spec.
-- **Routing → React Router v7** (`react-router-dom` is installed) over the four routes in SPEC §8.
+- **URL state → nuqs** for filter values, sort field/direction, and any view selection that should be shareable, survive refresh, and work with browser back/forward. Filters are **always** in the URL — never hidden in client state.
+- **Local component state → `useState`** for modals (open/close lives in the component that owns the modal trigger), form state (via react-hook-form), and transient UI like hover.
+- **Theme** — Tailwind `dark:` classes; the user's preference is persisted to `localStorage` directly. No store needed.
+- **Zustand** is installed but not used by default. Add a Zustand store **only** if a genuine cross-cutting global UI state need emerges (e.g., a sidebar collapse that's read by many unrelated components). Filters and modals don't qualify.
+- **Mock backend → MSW** implements the API endpoints. There is no real API; do not introduce one without explicit user direction.
+- **Routing → React Router v7** (`react-router-dom` v7) over four routes: `/dashboard`, `/transactions`, `/categories`, `/budgets`. Use the typed loader/action APIs where appropriate.
 - **Forms → react-hook-form + Zod resolvers** (`@hookform/resolvers` is installed).
 - **Charts → Recharts, lazy-loaded** via `React.lazy` / dynamic import to keep it out of the initial bundle.
-- **Virtualization → `@tanstack/react-virtual`** for the transactions list (the 10k-row scenario is the headline perf demo).
+- **Virtualization → `@tanstack/react-virtual`** for the transactions list once the 10k-row scenario is in place. Don't virtualize lists under ~100 items — it adds complexity without payoff.
 
-Project structure under `src/` (the on-disk layout has diverged from SPEC §16 — prefer the layout below for new code, since the spec's flat `components/{transactions,budgets,charts}` was reorganized into feature folders):
+### Generic DataTable
+
+The transactions, categories, and budgets pages share a single generic `DataTable<T extends { id: string }>` component (in `src/components/DataTable.tsx`). It accepts a typed columns config of the shape:
+
+```ts
+type Column<T> = {
+  key: keyof T;
+  header: string;
+  render?: (value: T[keyof T], row: T) => React.ReactNode;
+  sortable?: boolean;
+};
+```
+
+This is the project's primary tabular primitive and a deliberate showcase of TypeScript generics. Don't write per-feature ad-hoc tables — extend or compose `DataTable` instead.
+
+### API response shape
+
+All API responses use a discriminated union:
+
+```ts
+type ApiResponse<T> = { ok: true; data: T } | { ok: false; error: string };
+```
+
+Keep MSW handlers and client wrappers consistent with this shape.
+
+### Project structure under `src/`
 
 - `api/msw/` — MSW handlers and shared helpers; `queryKeys.ts` is the central registry for TanStack Query keys.
 - `components/ui/` — shadcn primitives (generated by the CLI, not hand-rolled).
 - `components/layout/` — app shell, navigation, page chrome.
+- `components/DataTable.tsx` — generic typed table used across features.
 - `features/{transactions,budgets,categories,dashboard}/` — feature-scoped components, hooks, and logic. **Charts** belong inside the feature that owns them (typically `dashboard/`) rather than in a top-level `charts/` folder.
 - `hooks/` — cross-feature hooks only; feature-specific hooks live under `features/<name>/`.
 - `lib/` — pure utilities (`cn()` is here).
-- `pages/` — route-level components for the four routes in SPEC §8.
-- `store/` — Zustand stores.
+- `pages/` — route-level components.
+- `store/` — Zustand stores. **This folder may stay empty.** Only create stores here if a genuine global UI state need emerges.
 - `types/` — shared TS types.
 
 Tests live at `/tests/unit/` at the repo root, not co-located in `src/`.
@@ -47,11 +76,23 @@ Tests live at `/tests/unit/` at the repo root, not co-located in `src/`.
 
 - **Path alias**: `@/*` maps to `src/*` (configured in both `tsconfig.json` and `vite.config.ts`). Prefer `@/...` imports over long relatives.
 - **TypeScript is strict** with `noUnusedLocals`, `noUnusedParameters`, and `verbatimModuleSyntax` on. Use `import type { ... }` for type-only imports — bare `import` of a type will fail to build.
+- **`any` is forbidden.** If you genuinely need to escape the type system, use `unknown` and narrow, or write a type guard.
 - **shadcn/ui** is configured with style `radix-nova`, base color `neutral`, CSS variables, and Lucide icons (`components.json`). Generate components with the shadcn CLI into `src/components/ui/` rather than hand-rolling Radix primitives. The `cn()` helper lives at `@/lib/utils`. The shadcn aliases (`components`, `ui`, `utils`, `lib`, `hooks`) are wired in `components.json` — the CLI uses these to place generated files.
 - **ESLint** has a scoped override for `src/components/ui/**` that disables `react-refresh/only-export-components` (shadcn components export non-component values like variants alongside their components). Don't disable that rule elsewhere — fix the export instead.
 - **Tailwind v4** is used via the `@tailwindcss/vite` plugin (no `tailwind.config.js`); design tokens are CSS variables in `src/index.css`.
-- **API responses** use the discriminated `ApiResponse<T> = { ok: true; data: T } | { ok: false; error: string }` shape from SPEC §6 — keep the MSW handlers and client wrappers consistent with this.
+
+## Decision discipline
+
+Before adding a library or pattern, check whether it's earning its place:
+
+- Don't add Zustand stores, Redux, Jotai, or any global UI state on speculation. Filters → URL. Modals → useState. Theme → localStorage. If you find a real exception, document the reasoning before introducing the dependency.
+- Don't introduce a real backend, GraphQL, tRPC, or auth layer — they're explicit non-goals.
+- Don't reach for a charting alternative to Recharts mid-project; it's a deliberate trade-off (faster implementation accepted, larger bundle mitigated via lazy loading).
 
 ## Performance discipline
 
-Performance is the point of this project, not an afterthought. Before reaching for a shortcut that defeats the demo (e.g., paginating server-side to dodge the 10k-row render, eagerly importing Recharts, skipping memoization on list rows), check SPEC §10–11 and prefer the documented technique. Lighthouse runs land in `docs/performance-before/` and `docs/performance-after/` with a comparison in `docs/performance-comparison.md` — preserve that structure when adding measurements.
+Performance is the point of this project, not an afterthought. Before reaching for a shortcut that defeats the demo (e.g., paginating server-side to dodge the 10k-row render, eagerly importing Recharts, skipping memoization on list rows), prefer the documented technique.
+
+Apply optimizations during the dedicated performance phase, not preemptively. Baseline first (Lighthouse + React DevTools Profiler), then targeted change, then measure delta. "Premature memoization" wastes time and hides where the real problems are.
+
+Lighthouse runs land in `docs/performance-before/` and `docs/performance-after/` with a comparison in `docs/performance-comparison.md` — preserve that structure when adding measurements.

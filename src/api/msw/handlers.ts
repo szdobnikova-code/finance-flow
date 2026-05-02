@@ -1,9 +1,7 @@
 import { http, HttpResponse } from "msw";
 
 import { budgets, categories, transactions } from "@/api/mockData";
-import type { Budget, Category, Transaction } from "@/types/finance";
-
-type ApiResponse<T> = { ok: true; data: T } | { ok: false; error: string };
+import type { ApiResponse, Budget, Category, Transaction } from "@/types/finance";
 
 const ok = <T>(data: T): ApiResponse<T> => ({ ok: true, data });
 

@@ -13,7 +13,7 @@ const navItems = [
 
 export default function Navbar() {
   return (
-    <nav className="hidden w-[280px] shrink-0 flex-col border-r border-zinc-200 bg-zinc-100/70 dark:border-zinc-800 dark:bg-zinc-900/60 md:flex">
+    <nav className=" sticky top-0 h-screen hidden w-[280px] shrink-0 flex-col border-r border-zinc-200 bg-zinc-100/70 dark:border-zinc-800 dark:bg-zinc-900/60 md:flex">
       <div className="border-b border-zinc-200 px-5 py-4 dark:border-zinc-800">
         <h1 className="max-w-[180px] text-[13px] font-semibold uppercase leading-5 tracking-wide text-zinc-800 dark:text-zinc-200">
           Personal Finance Dashboard
