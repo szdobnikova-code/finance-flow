@@ -58,7 +58,7 @@ export function DataTable<T extends { id: string }>({
                 key={String(col.key)}
                 onClick={col.sortable ? () => handleSort(col.key) : undefined}
                 className={cn(
-                  "text-left text-xs uppercase text-zinc-500 dark:text-zinc-400 px-4 py-3 border-b border-zinc-200 dark:border-zinc-800",
+                  "border-b border-zinc-200 px-4 py-3 text-left text-xs text-zinc-500 uppercase dark:border-zinc-800 dark:text-zinc-400",
                   col.sortable && "cursor-pointer select-none",
                 )}
               >
@@ -75,7 +75,7 @@ export function DataTable<T extends { id: string }>({
             key={row.id}
             onClick={onRowClick ? () => onRowClick(row) : undefined}
             className={cn(
-              "border-b border-zinc-200 dark:border-zinc-800 hover:bg-zinc-50 dark:hover:bg-zinc-800",
+              "border-b border-zinc-200 hover:bg-zinc-50 dark:border-zinc-800 dark:hover:bg-zinc-800",
               onRowClick && "cursor-pointer",
             )}
           >

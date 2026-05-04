@@ -3,13 +3,25 @@ import { useQuery } from "@tanstack/react-query";
 import { DataTable } from "@/components/DataTable";
 import { Skeleton } from "@/components/ui/skeleton";
 import { createTransactionColumns } from "@/features/transactions/columns";
+import { TransactionFilters } from "@/features/transactions/components/TransactionFilters.tsx";
+import { useTransactionFilters } from "@/features/transactions/hooks/useTransactionFilters";
 import { api } from "@/lib/api";
 import type { Category, Transaction } from "@/types/finance";
 
 export default function TransactionsPage() {
+  const [filters] = useTransactionFilters();
+
   const transactionsQuery = useQuery({
-    queryKey: ["transactions"],
-    queryFn: () => api.get<Transaction[]>("/transactions"),
+    queryKey: ["transactions", filters],
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    queryFn: () =>
+      api.get<Transaction[]>(
+        `/transactions?${new URLSearchParams(
+          Object.entries(filters)
+            .filter(([_, v]) => !!v)
+            .map(([k, v]) => [k, String(v)]),
+        )}`,
+      ),
   });
   const categoriesQuery = useQuery({
     queryKey: ["categories"],
@@ -33,7 +45,9 @@ export default function TransactionsPage() {
         </p>
       </div>
 
-      <div className="rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 overflow-hidden">
+      <TransactionFilters categories={categories} />
+
+      <div className="overflow-hidden rounded-lg border border-zinc-200 bg-white dark:border-zinc-800 dark:bg-zinc-900">
         {isLoading ? (
           <TableSkeleton />
         ) : isError ? (
@@ -54,7 +68,7 @@ export default function TransactionsPage() {
 
 function TableSkeleton() {
   return (
-    <div className="p-4 space-y-2">
+    <div className="space-y-2 p-4">
       {Array.from({ length: 8 }).map((_, i) => (
         <Skeleton key={i} className="h-9 w-full" />
       ))}

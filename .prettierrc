@@ -3,5 +3,18 @@
   "singleQuote": false,
   "trailingComma": "all",
   "printWidth": 100,
-  "tabWidth": 2
+  "tabWidth": 2,
+
+  "overrides": [
+    {
+      "files": "*.css",
+      "options": {
+        "parser": "css",
+        "singleQuote": false,
+        "tabWidth": 2
+      }
+    }
+  ],
+  "plugins": ["prettier-plugin-tailwindcss"],
+  "tailwindAttributes": ["className", "classNames"]
 }

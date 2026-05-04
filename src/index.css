@@ -9,14 +9,35 @@
   --color-surface: var(--surface);
   --color-border: var(--border);
 
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+
   --color-text-primary: var(--text-primary);
   --color-text-secondary: var(--text-secondary);
 
   --color-accent: var(--accent);
-  --color-accent-hover: var(--accent-hover);
+  --color-accent-foreground: var(--accent-foreground);
+
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
 
   --color-income: var(--income);
   --color-expense: var(--expense);
+
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
 }
 
 @layer base {
@@ -28,11 +49,34 @@
     --text-primary: var(--color-zinc-900);
     --text-secondary: var(--color-zinc-500);
 
-    --accent: var(--color-violet-500);
-    --accent-hover: var(--color-violet-600);
+    --accent: transparent;
+    --accent-foreground: var(--color-zinc-900);
+
+    --primary: var(--color-zinc-900);
+    --primary-foreground: var(--color-zinc-50);
+
+    --muted: var(--color-zinc-100);
+    --muted-foreground: var(--text-secondary);
 
     --income: var(--color-emerald-600);
     --expense: var(--color-red-600);
+
+    --popover: #ffffff;
+    --popover-foreground: var(--color-zinc-950);
+
+    --item-hover: rgba(0, 0, 0, 0.05);
+
+    --card: var(--surface);
+    --card-foreground: var(--text-primary);
+
+    --secondary: var(--color-zinc-100);
+    --secondary-foreground: var(--color-zinc-900);
+
+    --input: var(--color-zinc-200);
+    --ring: var(--color-zinc-400);
+
+    --destructive: var(--color-red-600);
+    --destructive-foreground: #ffffff;
   }
 
   .dark {
@@ -43,11 +87,34 @@
     --text-primary: var(--color-zinc-100);
     --text-secondary: var(--color-zinc-400);
 
-    --accent: var(--color-violet-500);
-    --accent-hover: var(--color-violet-400);
+    --accent: transparent;
+    --accent-foreground: var(--color-zinc-100);
+
+    --primary: var(--color-zinc-100);
+    --primary-foreground: var(--color-zinc-950);
+
+    --muted: var(--color-zinc-800);
+    --muted-foreground: var(--text-secondary);
 
     --income: var(--color-emerald-500);
     --expense: var(--color-red-500);
+
+    --popover: var(--color-zinc-900);
+    --popover-foreground: var(--color-zinc-50);
+
+    --item-hover: rgba(255, 255, 255, 0.08);
+
+    --card: var(--surface);
+    --card-foreground: var(--text-primary);
+
+    --secondary: var(--color-zinc-800);
+    --secondary-foreground: var(--color-zinc-100);
+
+    --input: var(--color-zinc-800);
+    --ring: var(--color-zinc-600);
+
+    --destructive: var(--color-red-500);
+    --destructive-foreground: #ffffff;
   }
 
   html {

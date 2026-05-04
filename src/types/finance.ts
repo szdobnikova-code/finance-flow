@@ -6,7 +6,7 @@ export type Transaction = {
   id: string;
   amount: number;
   type: TransactionType;
-  categoryId: string;
+  categoryId: number;
   date: string;
   description: string;
   createdAt: string;
@@ -14,7 +14,7 @@ export type Transaction = {
 };
 
 export type Category = {
-  id: string;
+  id: number;
   name: string;
   color: string;
   icon: string;
@@ -23,7 +23,7 @@ export type Category = {
 
 export type Budget = {
   id: string;
-  categoryId: string;
+  categoryId: number;
   limit: number;
   spent: number;
   period: "monthly";

@@ -14,7 +14,7 @@ const currencyFormatter = new Intl.NumberFormat(undefined, {
 });
 
 export function createTransactionColumns(
-  categoryMap: Record<string, Category>,
+  categoryMap: Record<number, Category>,
 ): Column<Transaction>[] {
   return [
     {
@@ -35,7 +35,7 @@ export function createTransactionColumns(
       header: "Category",
       sortable: true,
       render: (value) => {
-        const category = categoryMap[value as string];
+        const category = categoryMap[value as number];
         return <Badge variant="secondary">{category?.name ?? "Unknown"}</Badge>;
       },
     },

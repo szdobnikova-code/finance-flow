@@ -3,10 +3,10 @@ import { faker } from "@faker-js/faker";
 import type { Budget, Category, Transaction } from "@/types/finance";
 
 export const categories: Category[] = [
-  { id: "cat-1", name: "Salary", color: "emerald", icon: "wallet", type: "income" },
-  { id: "cat-2", name: "Groceries", color: "violet", icon: "shopping-cart", type: "expense" },
-  { id: "cat-3", name: "Transport", color: "blue", icon: "car", type: "expense" },
-  { id: "cat-4", name: "Rent", color: "red", icon: "home", type: "expense" },
+  { id: 1, name: "Salary", color: "emerald", icon: "wallet", type: "income" },
+  { id: 2, name: "Groceries", color: "violet", icon: "shopping-cart", type: "expense" },
+  { id: 3, name: "Transport", color: "blue", icon: "car", type: "expense" },
+  { id: 4, name: "Rent", color: "red", icon: "home", type: "expense" },
 ];
 
 export const transactions: Transaction[] = Array.from({ length: 1000 }, () => {
