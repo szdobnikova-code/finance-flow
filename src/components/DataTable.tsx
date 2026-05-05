@@ -12,17 +12,13 @@ export type Column<T> = {
 
 type SortState<T> = { key: keyof T; direction: "asc" | "desc" } | null;
 
-type DataTableProps<T> = {
+type DataTableProps<T extends { id: string }> = {
   data: T[];
   columns: Column<T>[];
-  onRowClick?: (row: T) => void;
+  actions?: (row: T) => ReactNode;
 };
 
-export function DataTable<T extends { id: string }>({
-  data,
-  columns,
-  onRowClick,
-}: DataTableProps<T>) {
+export function DataTable<T extends { id: string }>({ data, columns, actions }: DataTableProps<T>) {
   const [sort, setSort] = useState<SortState<T>>(null);
 
   const sorted = useMemo(() => {
@@ -67,17 +63,18 @@ export function DataTable<T extends { id: string }>({
               </th>
             );
           })}
+          {actions && (
+            <th className="border-b border-zinc-200 px-4 py-3 text-right text-xs font-medium tracking-wider text-zinc-500 uppercase dark:border-zinc-800 dark:text-zinc-400">
+              Actions
+            </th>
+          )}
         </tr>
       </thead>
       <tbody>
         {sorted.map((row) => (
           <tr
             key={row.id}
-            onClick={onRowClick ? () => onRowClick(row) : undefined}
-            className={cn(
-              "border-b border-zinc-200 hover:bg-zinc-50 dark:border-zinc-800 dark:hover:bg-zinc-800",
-              onRowClick && "cursor-pointer",
-            )}
+            className="cursor-pointer border-b border-zinc-200 hover:bg-zinc-50 dark:border-zinc-800 dark:hover:bg-zinc-800"
           >
             {columns.map((col) => {
               const value = row[col.key];
@@ -87,6 +84,11 @@ export function DataTable<T extends { id: string }>({
                 </td>
               );
             })}
+            {actions && (
+              <td className="px-4 py-3 text-right" onClick={(event) => event.stopPropagation()}>
+                {actions(row)}
+              </td>
+            )}
           </tr>
         ))}
       </tbody>

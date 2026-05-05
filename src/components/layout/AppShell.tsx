@@ -1,6 +1,7 @@
 import { Outlet } from "react-router-dom";
 
 import Navbar from "@/components/layout/Navbar";
+import { Toaster } from "@/components/ui/sonner.tsx";
 
 export default function AppShell() {
   return (
@@ -12,6 +13,7 @@ export default function AppShell() {
           <Outlet />
         </div>
       </main>
+      <Toaster position="top-center" duration={5000} />
     </div>
   );
 }

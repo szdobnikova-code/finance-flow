@@ -1,9 +1,11 @@
 import { http, HttpResponse } from "msw";
 
 import { budgets, categories, transactions } from "@/api/mockData";
-import type { ApiResponse, Budget, Category, Transaction } from "@/types/finance";
+import type { ApiResponse, Budget, Category, Transaction, TransactionInput } from "@/types/finance";
 
 const ok = <T>(data: T): ApiResponse<T> => ({ ok: true, data });
+
+const fail = <T>(error: string): ApiResponse<T> => ({ ok: false, error });
 
 export const handlers = [
   http.get("/transactions", ({ request }) => {
@@ -41,6 +43,62 @@ export const handlers = [
     }
 
     return HttpResponse.json<ApiResponse<Transaction[]>>(ok(filtered));
+  }),
+
+  http.post("/transactions", async ({ request }) => {
+    const body = (await request.json()) as TransactionInput;
+    const now = new Date().toISOString();
+
+    const transaction: Transaction = {
+      id: crypto.randomUUID(),
+      ...body,
+      createdAt: now,
+      updatedAt: now,
+    };
+
+    transactions.unshift(transaction);
+
+    return HttpResponse.json<ApiResponse<Transaction>>(ok(transaction));
+  }),
+
+  http.patch("/transactions/:id", async ({ params, request }) => {
+    const id = String(params.id);
+    const body = (await request.json()) as Partial<TransactionInput>;
+
+    const index = transactions.findIndex((transaction) => transaction.id === id);
+
+    if (index === -1) {
+      return HttpResponse.json<ApiResponse<Transaction>>(
+        fail<Transaction>("Transaction not found"),
+        { status: 404 },
+      );
+    }
+
+    const updated: Transaction = {
+      ...transactions[index],
+      ...body,
+      updatedAt: new Date().toISOString(),
+    };
+
+    transactions[index] = updated;
+
+    return HttpResponse.json<ApiResponse<Transaction>>(ok(updated));
+  }),
+
+  http.delete("/transactions/:id", ({ params }) => {
+    const id = String(params.id);
+    const index = transactions.findIndex((transaction) => transaction.id === id);
+
+    if (index === -1) {
+      return HttpResponse.json<ApiResponse<Transaction>>(
+        fail<Transaction>("Transaction not found"),
+        { status: 404 },
+      );
+    }
+
+    const [deleted] = transactions.splice(index, 1);
+
+    return HttpResponse.json<ApiResponse<Transaction>>(ok(deleted));
   }),
 
   http.get("/categories", () => {

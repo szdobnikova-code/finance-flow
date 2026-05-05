@@ -13,6 +13,8 @@ export type Transaction = {
   updatedAt: string;
 };
 
+export type TransactionInput = Omit<Transaction, "id" | "createdAt" | "updatedAt">;
+
 export type Category = {
   id: number;
   name: string;
