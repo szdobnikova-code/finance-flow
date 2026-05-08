@@ -1,0 +1,40 @@
+import {
+  Briefcase,
+  Car,
+  Coffee,
+  Dumbbell,
+  Film,
+  Gift,
+  GraduationCap,
+  Heart,
+  Home,
+  type LucideIcon,
+  Music,
+  Plane,
+  Receipt,
+  ShoppingBag,
+  ShoppingCart,
+  Utensils,
+  Wallet,
+} from "lucide-react";
+
+import type { CategoryIcon } from "@/types/finance";
+
+export const ICON_MAP: Record<CategoryIcon, LucideIcon> = {
+  wallet: Wallet,
+  "shopping-cart": ShoppingCart,
+  car: Car,
+  home: Home,
+  utensils: Utensils,
+  coffee: Coffee,
+  briefcase: Briefcase,
+  "graduation-cap": GraduationCap,
+  heart: Heart,
+  dumbbell: Dumbbell,
+  plane: Plane,
+  gift: Gift,
+  music: Music,
+  film: Film,
+  "shopping-bag": ShoppingBag,
+  receipt: Receipt,
+};

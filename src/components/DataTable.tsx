@@ -1,6 +1,8 @@
+import { Pencil, Trash2 } from "lucide-react";
 import type { ReactNode } from "react";
 import { useMemo, useState } from "react";
 
+import { Button } from "@/components/ui/button.tsx";
 import { cn } from "@/lib/utils";
 
 export type Column<T> = {
@@ -8,17 +10,24 @@ export type Column<T> = {
   header: string;
   render?: (value: T[keyof T], row: T) => ReactNode;
   sortable?: boolean;
+  shrink?: boolean;
 };
 
 type SortState<T> = { key: keyof T; direction: "asc" | "desc" } | null;
 
-type DataTableProps<T extends { id: string }> = {
+type DataTableProps<T extends { id: string | number }> = {
   data: T[];
   columns: Column<T>[];
-  actions?: (row: T) => ReactNode;
+  onEdit: (row: T) => void;
+  onDelete: (row: T) => void;
 };
 
-export function DataTable<T extends { id: string }>({ data, columns, actions }: DataTableProps<T>) {
+export function DataTable<T extends { id: string | number }>({
+  data,
+  columns,
+  onEdit,
+  onDelete,
+}: DataTableProps<T>) {
   const [sort, setSort] = useState<SortState<T>>(null);
 
   const sorted = useMemo(() => {
@@ -56,6 +65,7 @@ export function DataTable<T extends { id: string }>({ data, columns, actions }: 
                 className={cn(
                   "border-b border-zinc-200 px-4 py-3 text-left text-xs text-zinc-500 uppercase dark:border-zinc-800 dark:text-zinc-400",
                   col.sortable && "cursor-pointer select-none",
+                  col.shrink && "w-0 whitespace-nowrap",
                 )}
               >
                 {col.header}
@@ -63,11 +73,9 @@ export function DataTable<T extends { id: string }>({ data, columns, actions }: 
               </th>
             );
           })}
-          {actions && (
-            <th className="border-b border-zinc-200 px-4 py-3 text-right text-xs font-medium tracking-wider text-zinc-500 uppercase dark:border-zinc-800 dark:text-zinc-400">
-              Actions
-            </th>
-          )}
+          <th className="w-0 border-b border-zinc-200 px-4 py-3 text-right text-xs font-medium tracking-wider text-zinc-500 uppercase dark:border-zinc-800 dark:text-zinc-400">
+            Actions
+          </th>
         </tr>
       </thead>
       <tbody>
@@ -79,16 +87,39 @@ export function DataTable<T extends { id: string }>({ data, columns, actions }: 
             {columns.map((col) => {
               const value = row[col.key];
               return (
-                <td key={String(col.key)} className="px-4 py-3 text-sm">
+                <td
+                  key={String(col.key)}
+                  className={cn("px-4 py-3 text-sm", col.shrink && "w-0 whitespace-nowrap")}
+                >
                   {col.render ? col.render(value, row) : String(value)}
                 </td>
               );
             })}
-            {actions && (
-              <td className="px-4 py-3 text-right" onClick={(event) => event.stopPropagation()}>
-                {actions(row)}
-              </td>
-            )}
+            <td className="w-0 px-4 py-3 text-right" onClick={(event) => event.stopPropagation()}>
+              <div className="flex justify-end gap-1">
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon"
+                  className="h-8 w-8 text-zinc-500 hover:bg-zinc-100 hover:text-zinc-900 dark:text-zinc-400 dark:hover:bg-zinc-800 dark:hover:text-zinc-100"
+                  onClick={() => onEdit(row)}
+                  aria-label="Edit transaction"
+                >
+                  <Pencil className="h-4 w-4" />
+                </Button>
+
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon"
+                  className="h-8 w-8 text-zinc-500 hover:bg-red-50 hover:text-red-600 dark:text-zinc-400 dark:hover:bg-red-950/40 dark:hover:text-red-400"
+                  onClick={() => onDelete(row)}
+                  aria-label="Delete transaction"
+                >
+                  <Trash2 className="h-4 w-4" />
+                </Button>
+              </div>
+            </td>
           </tr>
         ))}
       </tbody>

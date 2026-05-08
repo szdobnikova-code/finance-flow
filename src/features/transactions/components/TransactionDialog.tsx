@@ -8,9 +8,11 @@ import { z } from "zod";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
+import { FormField } from "@/components/ui/form-field.tsx";
+import { fieldVariants } from "@/components/ui/form-shared.tsx";
 import { Input } from "@/components/ui/input";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { cn } from "@/lib/utils";
+import { cn } from "@/lib/utils.ts";
 import type { Category, Transaction } from "@/types/finance";
 
 const transactionSchema = z.object({
@@ -83,19 +85,6 @@ export function TransactionDialog({
     });
   }, [open, transaction, categories, form]);
 
-  const baseInput =
-    "h-9 w-full rounded-md border px-3 text-sm text-zinc-100 shadow-none outline-none transition-colors placeholder:text-zinc-500 focus:ring-0 focus-visible:ring-0";
-
-  const fieldSurface = "bg-zinc-900/60 hover:bg-zinc-900";
-
-  const normalBorder = "border-zinc-800 focus:border-zinc-600 focus-visible:border-zinc-600";
-
-  const errorBorder =
-    "border-red-500/80 bg-red-950/20 focus:border-red-500 focus-visible:border-red-500";
-
-  const label = "text-sm font-medium text-zinc-200";
-  const errorText = "text-xs text-red-400";
-
   const show = {
     description: touchedFields.description && errors.description,
     amount: touchedFields.amount && errors.amount,
@@ -115,50 +104,48 @@ export function TransactionDialog({
         </div>
 
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 px-5 py-4">
-          <div className="space-y-1.5">
-            <label className={label}>Description</label>
+          <FormField
+            label="Description"
+            error={show.description ? errors.description?.message : undefined}
+          >
             <Input
               {...form.register("description")}
               placeholder="e.g. Coffee, Salary, Rent"
-              className={cn(baseInput, fieldSurface, show.description ? errorBorder : normalBorder)}
+              className={fieldVariants({ variant: show.description ? "error" : "default" })}
             />
-            {show.description && <p className={errorText}>{errors.description?.message}</p>}
-          </div>
+          </FormField>
 
-          <div className="space-y-1.5">
-            <label className={label}>Amount</label>
+          <FormField label="Amount" error={show.amount ? errors.amount?.message : undefined}>
             <Input
               type="text"
               inputMode="decimal"
               {...form.register("amount")}
-              className={cn(baseInput, fieldSurface, show.amount ? errorBorder : normalBorder)}
+              className={fieldVariants({ variant: show.amount ? "error" : "default" })}
             />
-            {show.amount && <p className={errorText}>{errors.amount?.message}</p>}
-          </div>
+          </FormField>
 
-          <div className="space-y-1.5">
-            <label className={label}>Type</label>
+          <FormField label="Type">
             <div className="relative">
               <select
                 {...form.register("type")}
-                className={cn(baseInput, fieldSurface, normalBorder, "appearance-none pr-8")}
+                className={cn(fieldVariants({ variant: "default" }), "appearance-none pr-8")}
               >
                 <option value="expense">Expense</option>
                 <option value="income">Income</option>
               </select>
               <ChevronDown className="absolute top-2.5 right-2.5 h-4 w-4 text-zinc-500" />
             </div>
-          </div>
+          </FormField>
 
-          <div className="space-y-1.5">
-            <label className={label}>Category</label>
+          <FormField
+            label="Category"
+            error={show.category ? errors.categoryId?.message : undefined}
+          >
             <div className="relative">
               <select
                 {...form.register("categoryId")}
                 className={cn(
-                  baseInput,
-                  fieldSurface,
-                  show.category ? errorBorder : normalBorder,
+                  fieldVariants({ variant: show.category ? "error" : "default" }),
                   "appearance-none pr-8",
                 )}
               >
@@ -170,24 +157,16 @@ export function TransactionDialog({
               </select>
               <ChevronDown className="absolute top-2.5 right-2.5 h-4 w-4 text-zinc-500" />
             </div>
-            {show.category && <p className={errorText}>{errors.categoryId?.message}</p>}
-          </div>
+          </FormField>
 
           {/* Date */}
-          <div className="space-y-1.5">
-            <label className={label}>Date</label>
-
+          <FormField label="Date" error={show.date ? errors.date?.message : undefined}>
             <Popover>
               <PopoverTrigger asChild>
                 <Button
                   type="button"
                   variant="outline"
-                  className={cn(
-                    baseInput,
-                    fieldSurface,
-                    "justify-start text-left font-normal",
-                    show.date ? errorBorder : normalBorder,
-                  )}
+                  className={fieldVariants({ variant: show.date ? "error" : "default" })}
                 >
                   <CalendarIcon className="mr-2 h-4 w-4 text-zinc-500" />
                   {dateValue ? format(parseISO(dateValue), "MMM d, yyyy") : "Select date"}
@@ -208,9 +187,7 @@ export function TransactionDialog({
                 />
               </PopoverContent>
             </Popover>
-
-            {show.date && <p className={errorText}>{errors.date?.message}</p>}
-          </div>
+          </FormField>
 
           <div className="flex justify-end gap-2 border-t border-zinc-800 pt-4">
             <Button

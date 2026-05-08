@@ -1,14 +1,12 @@
 import { useQuery } from "@tanstack/react-query";
-import { Plus } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 
+import { queryKeys } from "@/api/queryKeys.ts";
 import { ConfirmationDialog } from "@/components/ConfirmationDialog.tsx";
-import { DataTable } from "@/components/DataTable";
-import { Button } from "@/components/ui/button.tsx";
-import { Skeleton } from "@/components/ui/skeleton";
+import { DataTableCard } from "@/components/DataTableCard.tsx";
+import { PageHeader } from "@/components/PageHeaderWithAction.tsx";
 import { createTransactionColumns } from "@/features/transactions/columns";
-import { TransactionActions } from "@/features/transactions/components/TransactionActions.tsx";
 import { TransactionDialog } from "@/features/transactions/components/TransactionDialog.tsx";
 import { TransactionFilters } from "@/features/transactions/components/TransactionFilters.tsx";
 import { useCreateTransaction } from "@/features/transactions/hooks/useCreateTransaction.ts";
@@ -29,7 +27,7 @@ export default function TransactionsPage() {
   const deleteMutation = useDeleteTransaction();
 
   const transactionsQuery = useQuery({
-    queryKey: ["transactions", filters],
+    queryKey: queryKeys.transactions.list(filters),
     queryFn: () =>
       api.get<Transaction[]>(
         `/transactions?${new URLSearchParams(
@@ -40,7 +38,7 @@ export default function TransactionsPage() {
       ),
   });
   const categoriesQuery = useQuery({
-    queryKey: ["categories"],
+    queryKey: queryKeys.categories.all,
     queryFn: () => api.get<Category[]>("/categories"),
   });
 
@@ -52,28 +50,20 @@ export default function TransactionsPage() {
   const categoryMap = Object.fromEntries(categories.map((c) => [c.id, c]));
   const columns = createTransactionColumns(categoryMap);
 
-  const handleCreate = (newTransaction: TransactionInput) => {
-    createMutation.mutate(newTransaction, {
-      onSuccess: () => toast.success("Transaction has been created"),
-      onError: (err) => toast.error(`Create failed: ${err.message}`),
-    });
-  };
-
-  const handleUpdate = (id: string, values: Partial<Transaction>) => {
-    updateMutation.mutate(
-      { id, ...values },
-      {
-        onSuccess: () => toast.success("Transaction has been updated"),
-        onError: (err) => toast.error(`Update failed: ${err.message}`),
-      },
-    );
-  };
-
   const handleSubmit = (values: TransactionInput) => {
     if (selectedTransaction) {
-      handleUpdate(selectedTransaction.id, values);
+      updateMutation.mutate(
+        { id: selectedTransaction.id, ...values },
+        {
+          onSuccess: () => toast.success("Transaction has been updated"),
+          onError: (err) => toast.error(`Update failed: ${err.message}`),
+        },
+      );
     } else {
-      handleCreate(values);
+      createMutation.mutate(values, {
+        onSuccess: () => toast.success("Transaction has been created"),
+        onError: (err) => toast.error(`Create failed: ${err.message}`),
+      });
     }
 
     setEditDialogOpen(false);
@@ -94,57 +84,31 @@ export default function TransactionsPage() {
 
   return (
     <div className="space-y-4">
-      <div className="flex items-start justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-semibold tracking-tight">Transactions</h1>
-          <p className="text-sm text-zinc-500 dark:text-zinc-400">
-            View and manage your transactions.
-          </p>
-        </div>
-
-        <Button
-          size="sm"
-          onClick={() => setEditDialogOpen(true)}
-          className="h-8 gap-1.5 rounded-md bg-zinc-900 px-3 text-xs font-medium text-white hover:bg-zinc-800 dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-zinc-200"
-        >
-          <Plus className="h-3.5 w-3.5" />
-          Add new
-        </Button>
-      </div>
+      <PageHeader
+        title="Transactions"
+        description="View and manage your transactions."
+        actionLabel="Add new"
+        onAction={() => setEditDialogOpen(true)}
+      />
 
       <TransactionFilters categories={categories} />
 
-      <div className="overflow-hidden rounded-lg border border-zinc-200 bg-white dark:border-zinc-800 dark:bg-zinc-900">
-        {isLoading ? (
-          <TableSkeleton />
-        ) : isError ? (
-          <div className="p-8 text-center text-sm text-red-600 dark:text-red-400">
-            Failed to load transactions.
-          </div>
-        ) : transactions.length === 0 ? (
-          <div className="p-8 text-center text-sm text-zinc-500 dark:text-zinc-400">
-            No transactions yet.
-          </div>
-        ) : (
-          <DataTable
-            data={transactions}
-            columns={columns}
-            actions={(transaction) => (
-              <TransactionActions
-                transaction={transaction}
-                onEdit={(tx) => {
-                  setSelectedTransaction(tx);
-                  setEditDialogOpen(true);
-                }}
-                onDelete={(tx) => {
-                  setSelectedTransaction(tx);
-                  setDeleteDialogOpen(true);
-                }}
-              />
-            )}
-          />
-        )}
-      </div>
+      <DataTableCard
+        data={transactions}
+        columns={columns}
+        isLoading={isLoading}
+        isError={isError}
+        emptyMessage="No transactions yet."
+        errorMessage={"Failed to load transactions."}
+        onEdit={(transaction) => {
+          setSelectedTransaction(transaction);
+          setEditDialogOpen(true);
+        }}
+        onDelete={(transaction) => {
+          setSelectedTransaction(transaction);
+          setDeleteDialogOpen(true);
+        }}
+      />
 
       <TransactionDialog
         transaction={selectedTransaction}
@@ -177,16 +141,6 @@ export default function TransactionsPage() {
         variant="destructive"
         onConfirm={handleDelete}
       />
-    </div>
-  );
-}
-
-function TableSkeleton() {
-  return (
-    <div className="space-y-2 p-4">
-      {Array.from({ length: 8 }).map((_, i) => (
-        <Skeleton key={i} className="h-9 w-full" />
-      ))}
     </div>
   );
 }

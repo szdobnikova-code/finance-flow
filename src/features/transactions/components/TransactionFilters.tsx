@@ -55,13 +55,16 @@ export function TransactionFilters({ categories }: { categories: Category[] }) {
     !!filters.from ||
     !!filters.to;
 
+  const inputClassName =
+    "border-input bg-background placeholder:text-muted-foreground focus-visible:border-input focus-visible:ring-ring h-10 border text-sm font-normal focus-visible:ring-2 focus-visible:ring-offset-0";
+
   return (
     <div className="flex flex-wrap items-center gap-3">
       <div className="relative min-w-[240px] flex-1">
         <Search className="text-muted-foreground absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2" />
         <Input
           placeholder="Search by description..."
-          className="border-input bg-background placeholder:text-muted-foreground focus-visible:border-input focus-visible:ring-ring h-10 border pl-9 text-sm font-normal focus-visible:ring-2 focus-visible:ring-offset-0"
+          className={`${inputClassName} pl-9`}
           value={searchValue}
           onChange={handleSearchChange}
         />
@@ -82,23 +85,21 @@ export function TransactionFilters({ categories }: { categories: Category[] }) {
         onRangeChange={setFilters}
       />
 
-      <div className="border-input bg-background focus-within:ring-ring flex h-10 items-center rounded-md border px-3 focus-within:ring-2 focus-within:ring-offset-0">
-        <Input
-          type="number"
-          placeholder="Min"
-          className="placeholder:text-muted-foreground h-full w-20 appearance-none border-none p-0 text-sm font-normal shadow-none focus-visible:border-transparent focus-visible:ring-0 [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
-          value={filters.minAmount ?? ""}
-          onChange={handleAmountChange("minAmount")}
-        />
-        <div className="bg-border mx-2 h-4 w-[1px]" />
-        <Input
-          type="number"
-          placeholder="Max"
-          className="placeholder:text-muted-foreground h-full w-20 appearance-none border-none p-0 text-sm font-normal shadow-none focus-visible:border-transparent focus-visible:ring-0 [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
-          value={filters.maxAmount ?? ""}
-          onChange={handleAmountChange("maxAmount")}
-        />
-      </div>
+      <Input
+        type="number"
+        placeholder="Min"
+        className={`${inputClassName} w-[100px]`}
+        value={filters.minAmount ?? ""}
+        onChange={handleAmountChange("minAmount")}
+      />
+
+      <Input
+        type="number"
+        placeholder="Max"
+        className={`${inputClassName} w-[100px]`}
+        value={filters.maxAmount ?? ""}
+        onChange={handleAmountChange("maxAmount")}
+      />
 
       <Button
         variant="ghost"

@@ -2,29 +2,29 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 import { queryKeys } from "@/api/queryKeys.ts";
 import { api } from "@/lib/api.ts";
-import type { Transaction } from "@/types/finance";
+import type { Budget } from "@/types/finance.ts";
 
 interface MutationContext {
-  previousData: Array<[readonly unknown[], Transaction[] | undefined]>;
+  previousData: Array<[readonly unknown[], Budget[] | undefined]>;
 }
 
-export const useDeleteTransaction = () => {
+export const useDeleteBudget = () => {
   const queryClient = useQueryClient();
 
   return useMutation<void, Error, string, MutationContext>({
     mutationFn: async (id: string) => {
-      await api.delete<string>(`/transactions/${id}`);
+      await api.delete<string>(`/budgets/${id}`);
     },
 
     onMutate: async (deletedId) => {
-      await queryClient.cancelQueries({ queryKey: queryKeys.transactions.all });
+      await queryClient.cancelQueries({ queryKey: queryKeys.budgets.all });
 
-      const previousData = queryClient.getQueriesData<Transaction[]>({
-        queryKey: queryKeys.transactions.all,
+      const previousData = queryClient.getQueriesData<Budget[]>({
+        queryKey: queryKeys.budgets.all,
       });
 
-      queryClient.setQueriesData<Transaction[]>({ queryKey: queryKeys.transactions.all }, (old) =>
-        old?.filter((t) => t.id !== deletedId),
+      queryClient.setQueriesData<Budget[]>({ queryKey: queryKeys.budgets.all }, (old) =>
+        old?.filter((b) => b.id !== deletedId),
       );
 
       return { previousData };
@@ -38,7 +38,7 @@ export const useDeleteTransaction = () => {
     },
 
     onSettled: () => {
-      queryClient.invalidateQueries({ queryKey: queryKeys.transactions.all });
+      queryClient.invalidateQueries({ queryKey: queryKeys.budgets.all });
     },
   });
 };

@@ -15,13 +15,48 @@ export type Transaction = {
 
 export type TransactionInput = Omit<Transaction, "id" | "createdAt" | "updatedAt">;
 
+export const CATEGORY_ICONS = [
+  "wallet",
+  "shopping-cart",
+  "car",
+  "home",
+  "utensils",
+  "coffee",
+  "briefcase",
+  "graduation-cap",
+  "heart",
+  "dumbbell",
+  "plane",
+  "gift",
+  "music",
+  "film",
+  "shopping-bag",
+  "receipt",
+] as const;
+
+export const CATEGORY_COLORS = [
+  "emerald",
+  "violet",
+  "blue",
+  "red",
+  "amber",
+  "pink",
+  "cyan",
+  "orange",
+] as const;
+
+export type CategoryIcon = (typeof CATEGORY_ICONS)[number];
+export type CategoryColor = (typeof CATEGORY_COLORS)[number];
+
 export type Category = {
   id: number;
   name: string;
-  color: string;
-  icon: string;
+  color: CategoryColor;
+  icon: CategoryIcon;
   type: TransactionType;
 };
+
+export type CategoryInput = Omit<Category, "id">;
 
 export type Budget = {
   id: string;
@@ -33,7 +68,4 @@ export type Budget = {
   updatedAt: string;
 };
 
-export type DateRange = {
-  from: string;
-  to: string;
-};
+export type BudgetInput = Omit<Budget, "id" | "createdAt" | "updatedAt">;
