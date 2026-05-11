@@ -26,7 +26,8 @@ export const useCreateCategory = () => {
       queryClient.setQueriesData<Category[]>({ queryKey: queryKeys.categories.all }, (old) => {
         const optimisticCat: Category = {
           id: -Date.now(),
-          ...newCategory };
+          ...newCategory,
+        };
         return old ? [optimisticCat, ...old] : [optimisticCat];
       });
 

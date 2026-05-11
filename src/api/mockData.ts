@@ -7,6 +7,8 @@ export const categories: Category[] = [
   { id: 2, name: "Groceries", color: "violet", icon: "shopping-cart", type: "expense" },
   { id: 3, name: "Transport", color: "blue", icon: "car", type: "expense" },
   { id: 4, name: "Rent", color: "red", icon: "home", type: "expense" },
+  { id: 5, name: "Entertainment", color: "pink", icon: "film", type: "expense" },
+  { id: 6, name: "Food", color: "orange", icon: "coffee", type: "expense" },
 ];
 
 export const transactions: Transaction[] = Array.from({ length: 1000 }, () => {

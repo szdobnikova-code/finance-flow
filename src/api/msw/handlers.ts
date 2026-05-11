@@ -145,7 +145,8 @@ export const handlers = [
     const id = Number(params.id);
     const index = categories.findIndex((c) => c.id === id);
 
-    if (index === -1) return HttpResponse.json<ApiResponse<Category>>(fail("Category not found"), { status: 404 });
+    if (index === -1)
+      return HttpResponse.json<ApiResponse<Category>>(fail("Category not found"), { status: 404 });
 
     const [deleted] = categories.splice(index, 1);
 
@@ -177,7 +178,8 @@ export const handlers = [
 
     const index = budgets.findIndex((b) => b.id === id);
 
-    if (index === -1) return HttpResponse.json<ApiResponse<Budget>>(fail("Budget not found"), { status: 404 });
+    if (index === -1)
+      return HttpResponse.json<ApiResponse<Budget>>(fail("Budget not found"), { status: 404 });
 
     const updated: Budget = {
       ...budgets[index],
