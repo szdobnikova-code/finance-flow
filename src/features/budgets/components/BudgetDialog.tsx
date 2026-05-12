@@ -1,5 +1,4 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import { ChevronDown } from "lucide-react";
 import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
@@ -9,7 +8,13 @@ import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { FormField } from "@/components/ui/form-field.tsx";
 import { fieldVariants } from "@/components/ui/form-shared.tsx";
 import { Input } from "@/components/ui/input";
-import { cn } from "@/lib/utils.ts";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select.tsx";
 import type { Budget, Category } from "@/types/finance";
 
 const budgetSchema = z.object({
@@ -91,9 +96,9 @@ export function BudgetDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="overflow-hidden rounded-xl border border-zinc-800 bg-zinc-950 p-0 sm:max-w-md">
-        <div className="border-b border-zinc-800 px-5 py-4">
-          <DialogTitle className="text-sm font-semibold text-zinc-100">
+      <DialogContent className="border-border bg-background overflow-hidden rounded-xl border p-0 sm:max-w-md">
+        <div className="border-border border-b px-5 py-4">
+          <DialogTitle className="text-foreground text-sm font-semibold">
             {isEdit ? "Edit budget" : "Add budget"}
           </DialogTitle>
         </div>
@@ -103,22 +108,29 @@ export function BudgetDialog({
             label="Category"
             error={show.category ? errors.categoryId?.message : undefined}
           >
-            <div className="relative">
-              <select
-                {...form.register("categoryId")}
-                className={cn(
-                  fieldVariants({ variant: show.category ? "error" : "default" }),
-                  "appearance-none pr-8",
-                )}
+            <Select
+              value={String(form.watch("categoryId"))}
+              onValueChange={(value) => {
+                form.setValue("categoryId", Number(value), {
+                  shouldTouch: true,
+                  shouldValidate: true,
+                });
+              }}
+            >
+              <SelectTrigger
+                className={fieldVariants({ variant: show.category ? "error" : "default" })}
               >
-                {categories.map((c) => (
-                  <option key={c.id} value={c.id}>
-                    {c.name}
-                  </option>
+                <SelectValue placeholder="Select category" />
+              </SelectTrigger>
+
+              <SelectContent>
+                {categories.map((category) => (
+                  <SelectItem key={category.id} value={String(category.id)}>
+                    {category.name}
+                  </SelectItem>
                 ))}
-              </select>
-              <ChevronDown className="absolute top-2.5 right-2.5 h-4 w-4 text-zinc-500" />
-            </div>
+              </SelectContent>
+            </Select>
           </FormField>
 
           <FormField label="Limit" error={show.limit ? errors.limit?.message : undefined}>
@@ -139,21 +151,17 @@ export function BudgetDialog({
             />
           </FormField>
 
-          <div className="flex flex-col-reverse gap-2 border-t border-zinc-800 pt-4 sm:flex-row sm:justify-end">
+          <div className="border-border flex flex-col-reverse gap-2 border-t pt-4 sm:flex-row sm:justify-end">
             <Button
               type="button"
               variant="ghost"
               onClick={() => onOpenChange()}
-              className="text-zinc-400 hover:text-white"
+              className="text-muted-foreground hover:text-foreground"
             >
               Cancel
             </Button>
 
-            <Button
-              type="submit"
-              disabled={isSubmitting}
-              className="bg-zinc-100 text-black hover:bg-white disabled:opacity-50"
-            >
+            <Button type="submit" disabled={isSubmitting} className="disabled:opacity-50">
               {isSubmitting ? "Saving..." : isEdit ? "Save changes" : "Add budget"}
             </Button>
           </div>

@@ -1,18 +1,19 @@
 import { cva } from "class-variance-authority";
 
 export const formClasses = {
-  label: "text-sm font-medium text-zinc-200",
-  errorText: "text-xs text-red-400",
+  label: "text-sm font-medium text-foreground",
+  errorText: "text-xs text-destructive",
   fieldWrapper: "space-y-1.5",
 };
 
 export const fieldVariants = cva(
-  "h-9 w-full rounded-md border px-3 text-sm text-zinc-100 shadow-none outline-none transition-colors placeholder:text-zinc-500 focus:ring-0 focus-visible:ring-0 bg-zinc-900/60 hover:bg-zinc-900",
+  "h-9 w-full rounded-md border bg-background px-3 text-sm text-foreground shadow-none outline-none transition-colors placeholder:text-muted-foreground focus:ring-0 focus-visible:ring-0 disabled:cursor-not-allowed disabled:opacity-50",
   {
     variants: {
       variant: {
-        default: "border-zinc-800 focus:border-zinc-600 focus-visible:border-zinc-600",
-        error: "border-red-500/80 bg-red-950/20 focus:border-red-500 focus-visible:border-red-500",
+        default: "border-input hover:bg-accent/40 focus:border-ring focus-visible:border-ring",
+        error:
+          "border-destructive bg-destructive/5 focus:border-destructive focus-visible:border-destructive",
       },
     },
     defaultVariants: {

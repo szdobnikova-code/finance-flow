@@ -13,7 +13,7 @@ https://personal-finance-flow.vercel.app/
 ## Features
 
 - Financial overview dashboard with charts and summary cards
-- Transactions management with filtering, search, and URL-persisted state
+- Transaction's management with filtering, search, and URL-persisted state
 - Budget tracking with progress indicators
 - Categories management
 - Responsive mobile/tablet/desktop layouts

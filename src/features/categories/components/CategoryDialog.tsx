@@ -1,5 +1,4 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import { ChevronDown } from "lucide-react";
 import { useEffect } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { z } from "zod";
@@ -7,8 +6,15 @@ import { z } from "zod";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { FormField } from "@/components/ui/form-field.tsx";
-import { fieldVariants } from "@/components/ui/form-shared.tsx";
+import { fieldVariants, formClasses } from "@/components/ui/form-shared.tsx";
 import { Input } from "@/components/ui/input.tsx";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select.tsx";
 import { COLOR_BG } from "@/features/categories/colorMap.ts";
 import { ICON_MAP } from "@/features/categories/iconMap.ts";
 import { cn } from "@/lib/utils.ts";
@@ -107,8 +113,6 @@ export function CategoryDialog({
     });
   }, [open, category, form]);
 
-  const label = "text-sm font-medium text-zinc-200";
-
   const show = {
     name: touchedFields.name && errors.name,
     color: touchedFields.color && errors.color,
@@ -118,9 +122,9 @@ export function CategoryDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="overflow-hidden rounded-xl border border-zinc-800 bg-zinc-950 p-0 sm:max-w-md">
-        <div className="border-b border-zinc-800 px-5 py-4">
-          <DialogTitle className="text-sm font-semibold text-zinc-100">
+      <DialogContent className="border-border bg-background overflow-hidden rounded-xl border p-0 sm:max-w-md">
+        <div className="border-border border-b px-5 py-4">
+          <DialogTitle className="text-foreground text-sm font-semibold">
             {isEdit ? "Edit category" : "Add category"}
           </DialogTitle>
         </div>
@@ -134,8 +138,8 @@ export function CategoryDialog({
             />
           </FormField>
 
-          <div className="space-y-1.5">
-            <label className={label}>Color</label>
+          <div className={formClasses.fieldWrapper}>
+            <label className={formClasses.label}>Color</label>
             <Controller
               control={form.control}
               name="color"
@@ -143,8 +147,8 @@ export function CategoryDialog({
             />
           </div>
 
-          <div className="space-y-1.5">
-            <label className={label}>Icon</label>
+          <div className={formClasses.fieldWrapper}>
+            <label className={formClasses.label}>Icon</label>
             <Controller
               control={form.control}
               name="icon"
@@ -153,36 +157,39 @@ export function CategoryDialog({
           </div>
 
           <FormField label="Type" error={show.type ? errors.type?.message : undefined}>
-            <div className="relative">
-              <select
-                {...form.register("type")}
-                className={cn(
-                  fieldVariants({ variant: show.type ? "error" : "default" }),
-                  "appearance-none pr-8",
-                )}
+            <Select
+              value={form.watch("type")}
+              onValueChange={(value: "income" | "expense") => {
+                form.setValue("type", value, {
+                  shouldTouch: true,
+                  shouldValidate: true,
+                });
+              }}
+            >
+              <SelectTrigger
+                className={fieldVariants({ variant: show.type ? "error" : "default" })}
               >
-                <option value="expense">Expense</option>
-                <option value="income">Income</option>
-              </select>
-              <ChevronDown className="absolute top-2.5 right-2.5 h-4 w-4 text-zinc-500" />
-            </div>
+                <SelectValue placeholder="Select type" />
+              </SelectTrigger>
+
+              <SelectContent>
+                <SelectItem value="expense">Expense</SelectItem>
+                <SelectItem value="income">Income</SelectItem>
+              </SelectContent>
+            </Select>
           </FormField>
 
-          <div className="flex flex-col-reverse gap-2 border-t border-zinc-800 pt-4 sm:flex-row sm:justify-end">
+          <div className="border-border flex flex-col-reverse gap-2 border-t pt-4 sm:flex-row sm:justify-end">
             <Button
               type="button"
               variant="ghost"
               onClick={() => onOpenChange()}
-              className="text-zinc-400 hover:text-white"
+              className="text-muted-foreground hover:text-foreground"
             >
               Cancel
             </Button>
 
-            <Button
-              type="submit"
-              disabled={isSubmitting}
-              className="bg-zinc-100 text-black hover:bg-white disabled:opacity-50"
-            >
+            <Button type="submit" disabled={isSubmitting} className="disabled:opacity-50">
               {isSubmitting ? "Saving..." : isEdit ? "Save changes" : "Add category"}
             </Button>
           </div>
