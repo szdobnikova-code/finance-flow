@@ -158,9 +158,7 @@ export function TransactionFilters({ categories }: { categories: Category[] }) {
               variant="outline"
               className="h-10 shrink-0 gap-2"
               aria-label={
-                advancedFilterCount > 0
-                  ? `Filters (${advancedFilterCount} active)`
-                  : "Filters"
+                advancedFilterCount > 0 ? `Filters (${advancedFilterCount} active)` : "Filters"
               }
             >
               <SlidersHorizontal className="h-4 w-4" />
@@ -172,10 +170,7 @@ export function TransactionFilters({ categories }: { categories: Category[] }) {
               )}
             </Button>
           </PopoverTrigger>
-          <PopoverContent
-            align="end"
-            className="w-[calc(100vw-2rem)] max-w-sm gap-3 p-3"
-          >
+          <PopoverContent align="end" className="w-[calc(100vw-2rem)] max-w-sm gap-3 p-3">
             {advancedControls}
           </PopoverContent>
         </Popover>
