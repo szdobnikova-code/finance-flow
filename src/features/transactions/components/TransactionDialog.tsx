@@ -189,7 +189,7 @@ export function TransactionDialog({
             </Popover>
           </FormField>
 
-          <div className="flex justify-end gap-2 border-t border-zinc-800 pt-4">
+          <div className="flex flex-col-reverse gap-2 border-t border-zinc-800 pt-4 sm:flex-row sm:justify-end">
             <Button
               type="button"
               variant="ghost"

@@ -15,12 +15,14 @@ import { cn } from "@/lib/utils.ts";
 import { type Category, CATEGORY_COLORS, CATEGORY_ICONS } from "@/types/finance";
 
 const IconPicker = ({ value, onChange }: { value: string; onChange: (v: string) => void }) => (
-  <div className="grid grid-cols-8 gap-2">
+  <div className="grid grid-cols-6 gap-2 sm:grid-cols-8">
     {Object.entries(ICON_MAP).map(([name, Icon]) => (
       <button
         key={name}
         type="button"
         onClick={() => onChange(name)}
+        aria-label={`Icon: ${name}`}
+        aria-pressed={value === name}
         className={cn(
           "flex h-9 w-9 items-center justify-center rounded-md border transition",
           value === name ? "border-primary bg-primary/10" : "border-border hover:bg-muted",
@@ -33,12 +35,14 @@ const IconPicker = ({ value, onChange }: { value: string; onChange: (v: string) 
 );
 
 const ColorPicker = ({ value, onChange }: { value: string; onChange: (v: string) => void }) => (
-  <div className="flex gap-2">
+  <div className="flex flex-wrap gap-2">
     {CATEGORY_COLORS.map((color) => (
       <button
         key={color}
         type="button"
         onClick={() => onChange(color)}
+        aria-label={`Color: ${color}`}
+        aria-pressed={value === color}
         className={cn(
           "ring-offset-background h-7 w-7 rounded-full ring-offset-2 transition",
           COLOR_BG[color],
@@ -164,7 +168,7 @@ export function CategoryDialog({
             </div>
           </FormField>
 
-          <div className="flex justify-end gap-2 border-t border-zinc-800 pt-4">
+          <div className="flex flex-col-reverse gap-2 border-t border-zinc-800 pt-4 sm:flex-row sm:justify-end">
             <Button
               type="button"
               variant="ghost"

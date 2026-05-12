@@ -16,6 +16,7 @@ import {
 } from "recharts";
 
 import { DateRangePicker } from "@/components/ui/date-range-picker";
+import { Skeleton } from "@/components/ui/skeleton";
 import { CategoryLegendItem } from "@/features/dashboard/components/CategoryLegendItem.tsx";
 import { ChartTooltip } from "@/features/dashboard/components/ChartTooltip.tsx";
 import { Panel } from "@/features/dashboard/components/Panel.tsx";
@@ -72,6 +73,8 @@ export default function DashboardPage() {
 
   const transactions = transactionsQuery.data ?? [];
   const categories = categoriesQuery.data ?? [];
+  const isLoading = transactionsQuery.isLoading || categoriesQuery.isLoading;
+  const isError = transactionsQuery.isError || categoriesQuery.isError;
 
   const stats = useMemo(() => {
     const expenses = transactions.filter((transaction) => transaction.type === "expense");
@@ -141,20 +144,68 @@ export default function DashboardPage() {
     };
   }, [transactions, categories]);
 
-  return (
-    <div className="space-y-6">
-      <div className="flex items-start justify-between">
-        <div>
-          <h1 className="text-2xl font-semibold tracking-tight">Dashboard</h1>
-          <p className="text-sm text-zinc-500 dark:text-zinc-400">Overview of your finances.</p>
-        </div>
+  const header = (
+    <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+      <div>
+        <h1 className="text-2xl font-semibold tracking-tight">Dashboard</h1>
+        <p className="text-sm text-zinc-500 dark:text-zinc-400">Overview of your finances.</p>
+      </div>
 
+      <div className="w-full sm:w-auto">
         <DateRangePicker
           from={filters.from ?? undefined}
           to={filters.to ?? undefined}
           onRangeChange={setFilters}
         />
       </div>
+    </div>
+  );
+
+  if (isError) {
+    return (
+      <div className="space-y-6">
+        {header}
+        <div className="rounded-lg border border-zinc-200 bg-white p-8 text-center text-sm text-red-600 dark:border-zinc-800 dark:bg-zinc-900 dark:text-red-400">
+          Failed to load dashboard data.
+        </div>
+      </div>
+    );
+  }
+
+  if (isLoading) {
+    return (
+      <div className="space-y-6">
+        {header}
+        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+          {Array.from({ length: 4 }).map((_, i) => (
+            <div
+              key={i}
+              className="rounded-lg border border-zinc-200 bg-white p-4 dark:border-zinc-800 dark:bg-zinc-900"
+            >
+              <Skeleton className="h-3 w-20" />
+              <Skeleton className="mt-3 h-6 w-28" />
+              <Skeleton className="mt-2 h-3 w-16" />
+            </div>
+          ))}
+        </div>
+        <div className="grid gap-4 xl:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)]">
+          <Panel title="Expenses by category">
+            <Skeleton className="h-[240px] w-full" />
+          </Panel>
+          <Panel title="Top 5 categories">
+            <Skeleton className="h-[250px] w-full" />
+          </Panel>
+        </div>
+        <Panel title="Monthly expenses">
+          <Skeleton className="h-[260px] w-full" />
+        </Panel>
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-6">
+      {header}
 
       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
         <SummaryCard label="Total spent" value={formatCurrency(stats.totalSpent)} tone="expense" />
@@ -211,7 +262,11 @@ export default function DashboardPage() {
               >
                 <CartesianGrid stroke="var(--border)" strokeDasharray="3 3" vertical={false} />
 
-                <XAxis dataKey="name" tick={{ fill: "var(--text-secondary)", fontSize: 12 }} />
+                <XAxis
+                  dataKey="name"
+                  interval={0}
+                  tick={{ fill: "var(--text-secondary)", fontSize: 11 }}
+                />
 
                 <YAxis
                   tick={{ fill: "var(--text-secondary)", fontSize: 12 }}

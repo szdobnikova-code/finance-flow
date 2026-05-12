@@ -36,7 +36,7 @@ export function DateRangePicker({ from, to, onRangeChange }: DateRangePickerProp
         <Button
           variant="outline"
           className={cn(
-            "border-input bg-background hover:bg-background h-10 w-[280px] justify-start border text-left font-normal",
+            "border-input bg-background hover:bg-background h-10 w-full justify-start border text-left font-normal sm:w-[280px]",
             !dateRange?.from && "text-text-secondary",
           )}
         >
