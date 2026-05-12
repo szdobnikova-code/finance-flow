@@ -297,8 +297,8 @@ export default function DashboardPage() {
           <ResponsiveContainer>
             <LineChart data={stats.monthly}>
               <CartesianGrid stroke="var(--border)" vertical={false} strokeDasharray="3 3" />
-              <XAxis dataKey="month" tick={{ fill: "var(--text-secondary)" }} />
-              <YAxis tickFormatter={formatCurrencyAxis} />
+              <XAxis dataKey="month" tick={{ fill: "var(--text-secondary)", fontSize: 11 }} />
+              <YAxis tickFormatter={formatCurrencyAxis} tick={{ fill: "var(--text-secondary)", fontSize: 12 }} />
               <Tooltip cursor={false} content={<ChartTooltip />} />
               <Line
                 type="monotone"
