@@ -11,7 +11,7 @@ export const categories: Category[] = [
   { id: 6, name: "Food", color: "orange", icon: "coffee", type: "expense" },
 ];
 
-export const transactions: Transaction[] = Array.from({ length: 1000 }, () => {
+export const transactions: Transaction[] = Array.from({ length: 10000 }, () => {
   const category = faker.helpers.arrayElement(categories);
   const now = new Date().toISOString();
 

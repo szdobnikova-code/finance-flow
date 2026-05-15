@@ -42,6 +42,8 @@
 
 @layer base {
   :root {
+    color-scheme: light;
+
     --background: var(--color-zinc-50);
     --surface: #ffffff;
     --border: var(--color-zinc-200);
@@ -80,6 +82,8 @@
   }
 
   .dark {
+    color-scheme: dark;
+
     --background: var(--color-zinc-950);
     --surface: var(--color-zinc-900);
     --border: var(--color-zinc-800);
@@ -135,5 +139,20 @@
 
   button {
     cursor: pointer;
+  }
+
+  input:-webkit-autofill,
+  input:-webkit-autofill:hover,
+  input:-webkit-autofill:focus,
+  textarea:-webkit-autofill,
+  textarea:-webkit-autofill:hover,
+  textarea:-webkit-autofill:focus,
+  select:-webkit-autofill,
+  select:-webkit-autofill:hover,
+  select:-webkit-autofill:focus {
+    -webkit-text-fill-color: var(--text-primary);
+    caret-color: var(--text-primary);
+    box-shadow: 0 0 0 1000px var(--background) inset;
+    transition: background-color 9999s ease-in-out 0s;
   }
 }
