@@ -77,6 +77,18 @@ The gzipped total for first-visit `/dashboard` is dominated by the unavoidable M
 - **No aggressive `manualChunks` for radix / tanstack / nuqs.** Vite's defaults already do a reasonable job here, and over-grouping can hurt by pulling chunks onto routes that don't use them. Revisit only if visualizer shows duplication.
 - **No virtualization or memoization work.** Out of scope for Day 9; planned for Day 10.
 
+## Production verification (Vercel)
+
+Local development measurements became noisy after introducing route splitting and MSW changes, so production deployment was used to validate real-world performance.
+
+Transactions page (Vercel production):
+
+- LCP: 2.07s
+- INP: 48ms
+- CLS: 0
+
+Despite slower local dev metrics, production confirms that bundle splitting and lazy loading reduced actual user-facing cost.
+
 ## Follow-up — MSW + faker removed from runtime path
 
 A second optimization pass addressed the remaining runtime bottleneck.
