@@ -1,10 +1,12 @@
+import { lazy } from "react";
 import { createBrowserRouter, Navigate } from "react-router-dom";
 
 import AppShell from "@/components/layout/AppShell";
-import BudgetsPage from "@/pages/BudgetsPage.tsx";
-import CategoriesPage from "@/pages/CategoriesPage.tsx";
-import DashboardPage from "@/pages/DashboardPage.tsx";
-import TransactionsPage from "@/pages/TransactionsPage.tsx";
+
+const DashboardPage = lazy(() => import("@/pages/DashboardPage.tsx"));
+const TransactionsPage = lazy(() => import("@/pages/TransactionsPage.tsx"));
+const BudgetsPage = lazy(() => import("@/pages/BudgetsPage.tsx"));
+const CategoriesPage = lazy(() => import("@/pages/CategoriesPage.tsx"));
 
 export const router = createBrowserRouter([
   {

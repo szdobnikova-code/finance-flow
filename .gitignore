@@ -12,6 +12,9 @@ dist
 dist-ssr
 *.local
 
+# Generated fixtures (created by scripts/generate-fixtures.ts during prebuild)
+public/fixtures/
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json

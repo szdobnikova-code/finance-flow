@@ -5,8 +5,8 @@ import { NavLink } from "react-router-dom";
 import { ThemeToggle } from "@/components/layout/ThemeToggle";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
+import { navItems } from "@/config/navItems";
 import { cn } from "@/lib/utils";
-import { navItems } from "@/types/finance";
 
 export default function MobileNavbar() {
   const [open, setOpen] = useState(false);

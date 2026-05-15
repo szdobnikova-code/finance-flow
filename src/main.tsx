@@ -17,12 +17,12 @@ const queryClient = new QueryClient({
   },
 });
 
-async function enableMocking() {
-  const { worker } = await import("@/api/msw/browser");
-  return worker.start({ onUnhandledRequest: "bypass" });
-}
+async function bootstrap() {
+  if (import.meta.env.VITE_ENABLE_MSW === "true") {
+    const { worker } = await import("@/api/msw/browser");
+    await worker.start({ onUnhandledRequest: "bypass" });
+  }
 
-enableMocking().then(() => {
   createRoot(document.getElementById("root")!).render(
     <StrictMode>
       <NuqsAdapter>
@@ -32,4 +32,6 @@ enableMocking().then(() => {
       </NuqsAdapter>
     </StrictMode>,
   );
-});
+}
+
+bootstrap();

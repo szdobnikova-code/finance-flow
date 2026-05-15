@@ -1,8 +1,8 @@
 import { NavLink } from "react-router-dom";
 
 import { ThemeToggle } from "@/components/layout/ThemeToggle";
+import { navItems } from "@/config/navItems";
 import { cn } from "@/lib/utils";
-import { navItems } from "@/types/finance.ts";
 
 export default function Navbar() {
   return (

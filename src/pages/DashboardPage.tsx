@@ -1,41 +1,36 @@
 import { useQuery } from "@tanstack/react-query";
-import { useEffect, useMemo } from "react";
-import {
-  Bar,
-  BarChart,
-  CartesianGrid,
-  Line,
-  LineChart,
-  Pie,
-  PieChart,
-  Rectangle,
-  ResponsiveContainer,
-  Tooltip,
-  XAxis,
-  YAxis,
-} from "recharts";
+import { lazy, Suspense, useEffect, useMemo } from "react";
 
 import { DateRangePicker } from "@/components/ui/date-range-picker";
 import { Skeleton } from "@/components/ui/skeleton";
-import { CategoryLegendItem } from "@/features/dashboard/components/CategoryLegendItem.tsx";
-import { ChartTooltip } from "@/features/dashboard/components/ChartTooltip.tsx";
 import { Panel } from "@/features/dashboard/components/Panel.tsx";
 import { SummaryCard } from "@/features/dashboard/components/SummaryCard.tsx";
 import { useTransactionFilters } from "@/features/transactions/hooks/useTransactionFilters";
 import { api } from "@/lib/api";
-import { formatCurrency, formatCurrencyAxis } from "@/lib/utils.ts";
-import type { Category, CategoryColor, Transaction } from "@/types/finance";
+import { formatCurrency } from "@/lib/utils.ts";
+import type { Category, Transaction } from "@/types/finance";
 
-const CATEGORY_HEX: Record<CategoryColor, string> = {
-  emerald: "#10b981",
-  violet: "#8b5cf6",
-  blue: "#3b82f6",
-  red: "#ef4444",
-  amber: "#f59e0b",
-  pink: "#ec4899",
-  cyan: "#06b6d4",
-  orange: "#f97316",
-};
+const DashboardCharts = lazy(
+  () => import("@/features/dashboard/components/DashboardCharts.tsx"),
+);
+
+function ChartsFallback() {
+  return (
+    <>
+      <div className="grid gap-4 xl:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)]">
+        <Panel title="Expenses by category">
+          <Skeleton className="h-[240px] w-full" />
+        </Panel>
+        <Panel title="Top 5 categories">
+          <Skeleton className="h-[250px] w-full" />
+        </Panel>
+      </div>
+      <Panel title="Monthly expenses">
+        <Skeleton className="h-[260px] w-full" />
+      </Panel>
+    </>
+  );
+}
 
 export default function DashboardPage() {
   const [filters, setFilters] = useTransactionFilters();
@@ -188,17 +183,7 @@ export default function DashboardPage() {
             </div>
           ))}
         </div>
-        <div className="grid gap-4 xl:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)]">
-          <Panel title="Expenses by category">
-            <Skeleton className="h-[240px] w-full" />
-          </Panel>
-          <Panel title="Top 5 categories">
-            <Skeleton className="h-[250px] w-full" />
-          </Panel>
-        </div>
-        <Panel title="Monthly expenses">
-          <Skeleton className="h-[260px] w-full" />
-        </Panel>
+        <ChartsFallback />
       </div>
     );
   }
@@ -224,96 +209,13 @@ export default function DashboardPage() {
         />
       </div>
 
-      <div className="grid gap-4 xl:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)]">
-        <Panel title="Expenses by category">
-          <div className="grid gap-6 lg:grid-cols-[240px_minmax(0,1fr)]">
-            <div className="h-[240px]">
-              <ResponsiveContainer width="100%" height="100%">
-                <PieChart>
-                  <Pie
-                    data={stats.expensesByCategory.map((item) => ({
-                      ...item,
-                      fill: CATEGORY_HEX[item.color],
-                      name: item.name,
-                    }))}
-                    dataKey="amount"
-                    nameKey="name"
-                    outerRadius={100}
-                    stroke="var(--card)"
-                  />
-                  <Tooltip content={<ChartTooltip />} />
-                </PieChart>
-              </ResponsiveContainer>
-            </div>
-            <div className="space-y-3 self-center">
-              {stats.expensesByCategory.map((item) => (
-                <CategoryLegendItem key={item.categoryId} item={item} />
-              ))}
-            </div>
-          </div>
-        </Panel>
-
-        <Panel title={"Top 5 categories"}>
-          <div className="h-[250px]">
-            <ResponsiveContainer height="100%" width="100%">
-              <BarChart
-                data={stats.topCategories}
-                margin={{ top: 8, right: 16, left: 0, bottom: 8 }}
-              >
-                <CartesianGrid stroke="var(--border)" strokeDasharray="3 3" vertical={false} />
-
-                <XAxis
-                  dataKey="name"
-                  interval={0}
-                  tick={{ fill: "var(--text-secondary)", fontSize: 11 }}
-                />
-
-                <YAxis
-                  tick={{ fill: "var(--text-secondary)", fontSize: 12 }}
-                  tickFormatter={formatCurrencyAxis}
-                />
-
-                <Tooltip cursor={false} content={<ChartTooltip />} />
-
-                <Bar
-                  dataKey="amount"
-                  radius={[6, 6, 0, 0]}
-                  shape={(props) => {
-                    const { payload } = props;
-
-                    return (
-                      <Rectangle {...props} fill={CATEGORY_HEX[payload.color as CategoryColor]} />
-                    );
-                  }}
-                />
-              </BarChart>
-            </ResponsiveContainer>
-          </div>
-        </Panel>
-      </div>
-
-      <Panel title="Monthly expenses">
-        <div className="h-[260px]">
-          <ResponsiveContainer>
-            <LineChart data={stats.monthly}>
-              <CartesianGrid stroke="var(--border)" vertical={false} strokeDasharray="3 3" />
-              <XAxis dataKey="month" tick={{ fill: "var(--text-secondary)", fontSize: 11 }} />
-              <YAxis
-                tickFormatter={formatCurrencyAxis}
-                tick={{ fill: "var(--text-secondary)", fontSize: 12 }}
-              />
-              <Tooltip cursor={false} content={<ChartTooltip />} />
-              <Line
-                type="monotone"
-                dataKey="amount"
-                stroke="var(--color-expense)"
-                strokeWidth={2}
-                dot={false}
-              />
-            </LineChart>
-          </ResponsiveContainer>
-        </div>
-      </Panel>
+      <Suspense fallback={<ChartsFallback />}>
+        <DashboardCharts
+          expensesByCategory={stats.expensesByCategory}
+          topCategories={stats.topCategories}
+          monthly={stats.monthly}
+        />
+      </Suspense>
     </div>
   );
 }

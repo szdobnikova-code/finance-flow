@@ -1,8 +1,24 @@
+import { Suspense } from "react";
 import { Outlet } from "react-router-dom";
 
 import MobileNavbar from "@/components/layout/MobileNavbar";
 import Navbar from "@/components/layout/Navbar";
+import { Skeleton } from "@/components/ui/skeleton";
 import { Toaster } from "@/components/ui/sonner";
+
+function PageFallback() {
+  return (
+    <div className="space-y-6">
+      <Skeleton className="h-8 w-48" />
+      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+        {Array.from({ length: 4 }).map((_, i) => (
+          <Skeleton key={i} className="h-24 w-full" />
+        ))}
+      </div>
+      <Skeleton className="h-[260px] w-full" />
+    </div>
+  );
+}
 
 export default function AppShell() {
   return (
@@ -22,7 +38,9 @@ export default function AppShell() {
 
         <main className="min-w-0 flex-1">
           <div className="w-full px-4 py-6 sm:px-6 md:px-10 md:py-10">
-            <Outlet />
+            <Suspense fallback={<PageFallback />}>
+              <Outlet />
+            </Suspense>
           </div>
         </main>
       </div>
