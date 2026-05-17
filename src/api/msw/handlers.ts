@@ -88,8 +88,14 @@ export const handlers = [
     }
 
     const limit = Number(limitParam) || 50;
+    // Within a day, surface newest-created first so just-added transactions appear
+    // at the top of their date group regardless of whether the user submitted a
+    // date-only string (2026-05-17) or a full ISO timestamp.
     const sorted = [...filtered].sort((a, b) => {
-      if (a.date !== b.date) return b.date.localeCompare(a.date);
+      const dayA = a.date.slice(0, 10);
+      const dayB = b.date.slice(0, 10);
+      if (dayA !== dayB) return dayB.localeCompare(dayA);
+      if (a.createdAt !== b.createdAt) return b.createdAt.localeCompare(a.createdAt);
       return a.id.localeCompare(b.id);
     });
 
