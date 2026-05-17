@@ -13,7 +13,6 @@ Environment:
 - Chrome Lighthouse
 - React DevTools Profiler
 
-
 ---
 
 # Dashboard page
@@ -119,8 +118,8 @@ React Query cache tuning.
 Current QueryClient:
 
 ```ts
-staleTime: 0
-refetchOnMount: true
+staleTime: 0;
+refetchOnMount: true;
 ```
 
 Likely excessive refetching.

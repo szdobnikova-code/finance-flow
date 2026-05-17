@@ -33,11 +33,7 @@ export default defineConfig({
           ) {
             return "react-vendor";
           }
-          if (
-            id.includes("/recharts/") ||
-            id.includes("/d3-") ||
-            id.includes("/victory-vendor/")
-          ) {
+          if (id.includes("/recharts/") || id.includes("/d3-") || id.includes("/victory-vendor/")) {
             return "recharts";
           }
         },

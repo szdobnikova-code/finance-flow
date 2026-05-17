@@ -10,9 +10,7 @@ import { api } from "@/lib/api";
 import { formatCurrency } from "@/lib/utils.ts";
 import type { Category, Transaction } from "@/types/finance";
 
-const DashboardCharts = lazy(
-  () => import("@/features/dashboard/components/DashboardCharts.tsx"),
-);
+const DashboardCharts = lazy(() => import("@/features/dashboard/components/DashboardCharts.tsx"));
 
 function ChartsFallback() {
   return (

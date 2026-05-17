@@ -2,6 +2,7 @@ import type { ReactNode } from "react";
 
 import { type Column, DataTable } from "@/components/DataTable.tsx";
 import { Skeleton } from "@/components/ui/skeleton.tsx";
+import { VirtualDataTable } from "@/components/VirtualDataTable.tsx";
 import { cn } from "@/lib/utils.ts";
 
 type DataTableCardProps<T extends { id: string | number }> = {
@@ -14,6 +15,7 @@ type DataTableCardProps<T extends { id: string | number }> = {
   onEdit?: (row: T) => void;
   onDelete?: (row: T) => void;
   className?: string;
+  virtualized?: boolean;
 };
 
 export function DataTableCard<T extends { id: string | number }>({
@@ -26,6 +28,7 @@ export function DataTableCard<T extends { id: string | number }>({
   onEdit,
   onDelete,
   className,
+  virtualized = false,
 }: DataTableCardProps<T>) {
   return (
     <div
@@ -42,6 +45,13 @@ export function DataTableCard<T extends { id: string | number }>({
         <div className="p-8 text-center text-sm text-zinc-500 dark:text-zinc-400">
           {emptyMessage}
         </div>
+      ) : virtualized ? (
+        <VirtualDataTable
+          data={data}
+          columns={columns}
+          onEdit={onEdit ?? (() => {})}
+          onDelete={onDelete ?? (() => {})}
+        />
       ) : (
         <DataTable
           data={data}

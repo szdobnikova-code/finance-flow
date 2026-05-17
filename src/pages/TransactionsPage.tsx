@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { toast } from "sonner";
 
 import { queryKeys } from "@/api/queryKeys.ts";
@@ -48,7 +48,7 @@ export default function TransactionsPage() {
   const categories = categoriesQuery.data ?? [];
 
   const categoryMap = Object.fromEntries(categories.map((c) => [c.id, c]));
-  const columns = createTransactionColumns(categoryMap);
+  const columns = useMemo(() => createTransactionColumns(categoryMap), [categoryMap]);
 
   const handleSubmit = (values: TransactionInput) => {
     if (selectedTransaction) {
@@ -98,6 +98,7 @@ export default function TransactionsPage() {
         columns={columns}
         isLoading={isLoading}
         isError={isError}
+        virtualized
         emptyMessage="No transactions yet."
         errorMessage={"Failed to load transactions."}
         onEdit={(transaction) => {
