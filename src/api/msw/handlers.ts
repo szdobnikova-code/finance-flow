@@ -8,6 +8,7 @@ import type {
   CategoryInput,
   Transaction,
   TransactionInput,
+  TransactionPage,
 } from "@/types/finance";
 
 const ok = <T>(data: T): ApiResponse<T> => ({ ok: true, data });
@@ -76,7 +77,28 @@ export const handlers = [
       });
     }
 
-    return HttpResponse.json<ApiResponse<Transaction[]>>(ok(filtered));
+    const cursor = url.searchParams.get("cursor");
+    const limitParam = url.searchParams.get("limit");
+    const paginated = cursor !== null || limitParam !== null;
+
+    type TransactionsListResponse = ApiResponse<Transaction[] | TransactionPage>;
+
+    if (!paginated) {
+      return HttpResponse.json<TransactionsListResponse>(ok(filtered));
+    }
+
+    const limit = Number(limitParam) || 50;
+    const sorted = [...filtered].sort((a, b) => {
+      if (a.date !== b.date) return b.date.localeCompare(a.date);
+      return a.id.localeCompare(b.id);
+    });
+
+    const startIndex = cursor ? sorted.findIndex((t) => t.id === cursor) + 1 : 0;
+    const pageItems = sorted.slice(startIndex, startIndex + limit);
+    const nextCursor =
+      startIndex + limit < sorted.length ? pageItems[pageItems.length - 1].id : null;
+
+    return HttpResponse.json<TransactionsListResponse>(ok({ data: pageItems, nextCursor }));
   }),
 
   http.post("/transactions", async ({ request }) => {

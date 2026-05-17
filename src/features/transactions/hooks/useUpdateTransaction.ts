@@ -1,11 +1,11 @@
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { type InfiniteData, useMutation, useQueryClient } from "@tanstack/react-query";
 
 import { queryKeys } from "@/api/queryKeys.ts";
 import { api } from "@/lib/api.ts";
-import type { Transaction } from "@/types/finance";
+import type { Transaction, TransactionPage } from "@/types/finance";
 
 interface MutationContext {
-  previousData: Array<[readonly unknown[], Transaction[] | undefined]>;
+  previousData: Array<[readonly unknown[], InfiniteData<TransactionPage> | undefined]>;
 }
 type UpdatePayload = { id: string } & Partial<Transaction>;
 
@@ -13,41 +13,46 @@ export const useUpdateTransaction = () => {
   const queryClient = useQueryClient();
 
   return useMutation<Transaction, Error, UpdatePayload, MutationContext>({
-    mutationFn: async ({ id, ...data }) => {
-      return await api.patch<Transaction>(`/transactions/${id}`, data);
-    },
+    mutationFn: ({ id, ...data }) => api.patch<Transaction>(`/transactions/${id}`, data),
 
-    onMutate: async (updatedTransaction) => {
+    onMutate: async (input) => {
       await queryClient.cancelQueries({ queryKey: queryKeys.transactions.all });
 
-      const previousData = queryClient.getQueriesData<Transaction[]>({
-        queryKey: queryKeys.transactions.all,
+      const previousData = queryClient.getQueriesData<InfiniteData<TransactionPage>>({
+        queryKey: queryKeys.transactions.infinite,
       });
 
-      queryClient.setQueriesData<Transaction[]>({ queryKey: queryKeys.transactions.all }, (old) =>
-        old?.map((transaction) =>
-          transaction.id === updatedTransaction.id
-            ? {
-                ...transaction,
-                ...updatedTransaction,
-                updatedAt: new Date().toISOString(),
-              }
-            : transaction,
-        ),
+      const updatedAt = new Date().toISOString();
+
+      queryClient.setQueriesData<InfiniteData<TransactionPage>>(
+        { queryKey: queryKeys.transactions.infinite },
+        (old) => {
+          if (!old) return old;
+          return {
+            ...old,
+            pages: old.pages.map((page) => ({
+              ...page,
+              data: page.data.map((t) =>
+                t.id === input.id ? { ...t, ...input, updatedAt } : t,
+              ),
+            })),
+          };
+        },
       );
 
       return { previousData };
     },
 
-    onError: (_err, _updatePayload, context) => {
+    onError: (_err, _input, context) => {
       if (!context) return;
-      context.previousData.forEach(([queryKey, data]) => {
-        queryClient.setQueryData(queryKey, data);
+      context.previousData.forEach(([key, data]) => {
+        queryClient.setQueryData(key, data);
       });
     },
 
     onSettled: () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.transactions.all });
+      queryClient.invalidateQueries({ queryKey: queryKeys.budgets.all });
     },
   });
 };

@@ -16,6 +16,7 @@ type DataTableCardProps<T extends { id: string | number }> = {
   onDelete?: (row: T) => void;
   className?: string;
   virtualized?: boolean;
+  onEndReached?: () => void;
 };
 
 export function DataTableCard<T extends { id: string | number }>({
@@ -29,6 +30,7 @@ export function DataTableCard<T extends { id: string | number }>({
   onDelete,
   className,
   virtualized = false,
+  onEndReached,
 }: DataTableCardProps<T>) {
   return (
     <div
@@ -51,6 +53,7 @@ export function DataTableCard<T extends { id: string | number }>({
           columns={columns}
           onEdit={onEdit ?? (() => {})}
           onDelete={onDelete ?? (() => {})}
+          onEndReached={onEndReached}
         />
       ) : (
         <DataTable

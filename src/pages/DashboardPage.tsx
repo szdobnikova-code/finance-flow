@@ -1,6 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { lazy, Suspense, useEffect, useMemo } from "react";
 
+import { queryKeys } from "@/api/queryKeys";
 import { DateRangePicker } from "@/components/ui/date-range-picker";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Panel } from "@/features/dashboard/components/Panel.tsx";
@@ -48,7 +49,7 @@ export default function DashboardPage() {
   }, [filters.from, filters.to, setFilters]);
 
   const transactionsQuery = useQuery({
-    queryKey: ["transactions", filters],
+    queryKey: queryKeys.transactions.list(filters),
     queryFn: () =>
       api.get<Transaction[]>(
         `/transactions?${new URLSearchParams(
@@ -60,7 +61,7 @@ export default function DashboardPage() {
   });
 
   const categoriesQuery = useQuery({
-    queryKey: ["categories"],
+    queryKey: queryKeys.categories.all,
     queryFn: () => api.get<Category[]>("/categories"),
   });
 

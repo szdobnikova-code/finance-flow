@@ -1,11 +1,11 @@
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { type InfiniteData, useMutation, useQueryClient } from "@tanstack/react-query";
 
 import { queryKeys } from "@/api/queryKeys.ts";
 import { api } from "@/lib/api.ts";
-import type { Transaction } from "@/types/finance";
+import type { TransactionPage } from "@/types/finance";
 
 interface MutationContext {
-  previousData: Array<[readonly unknown[], Transaction[] | undefined]>;
+  previousData: Array<[readonly unknown[], InfiniteData<TransactionPage> | undefined]>;
 }
 
 export const useDeleteTransaction = () => {
@@ -19,12 +19,22 @@ export const useDeleteTransaction = () => {
     onMutate: async (deletedId) => {
       await queryClient.cancelQueries({ queryKey: queryKeys.transactions.all });
 
-      const previousData = queryClient.getQueriesData<Transaction[]>({
-        queryKey: queryKeys.transactions.all,
+      const previousData = queryClient.getQueriesData<InfiniteData<TransactionPage>>({
+        queryKey: queryKeys.transactions.infinite,
       });
 
-      queryClient.setQueriesData<Transaction[]>({ queryKey: queryKeys.transactions.all }, (old) =>
-        old?.filter((t) => t.id !== deletedId),
+      queryClient.setQueriesData<InfiniteData<TransactionPage>>(
+        { queryKey: queryKeys.transactions.infinite },
+        (old) => {
+          if (!old) return old;
+          return {
+            ...old,
+            pages: old.pages.map((page) => ({
+              ...page,
+              data: page.data.filter((t) => t.id !== deletedId),
+            })),
+          };
+        },
       );
 
       return { previousData };
@@ -32,13 +42,14 @@ export const useDeleteTransaction = () => {
 
     onError: (_err, _deletedId, context) => {
       if (!context) return;
-      context.previousData.forEach(([queryKey, data]) => {
-        queryClient.setQueryData(queryKey, data);
+      context.previousData.forEach(([key, data]) => {
+        queryClient.setQueryData(key, data);
       });
     },
 
     onSettled: () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.transactions.all });
+      queryClient.invalidateQueries({ queryKey: queryKeys.budgets.all });
     },
   });
 };

@@ -8,19 +8,18 @@ import { createRoot } from "react-dom/client";
 
 import App from "./App.tsx";
 
+// Finance data changes often enough that we want freshness on focus, but not so
+// often that we hammer the API on every render. 30s staleTime is the sweet spot:
+// fast enough that a mutation in another tab is visible quickly, slow enough
+// that re-mounting a component (e.g. closing a modal) does not trigger a refetch.
 export const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      staleTime: 1000 * 60 * 5, // 5 min
-      gcTime: 1000 * 60 * 30, // 30 min
-
-      retry: 1,
-
-      refetchOnMount: false,
-      refetchOnWindowFocus: false,
+      staleTime: 30_000,
+      gcTime: 5 * 60_000,
+      refetchOnWindowFocus: true,
       refetchOnReconnect: true,
-
-      refetchInterval: false,
+      retry: 1,
     },
 
     mutations: {

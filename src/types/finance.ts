@@ -15,6 +15,11 @@ export type Transaction = {
 
 export type TransactionInput = Omit<Transaction, "id" | "createdAt" | "updatedAt">;
 
+export type TransactionPage = {
+  data: Transaction[];
+  nextCursor: string | null;
+};
+
 export const CATEGORY_ICONS = [
   "wallet",
   "shopping-cart",

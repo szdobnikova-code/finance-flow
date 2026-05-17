@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { toast } from "sonner";
 
 import { queryKeys } from "@/api/queryKeys.ts";
@@ -11,6 +11,7 @@ import { TransactionDialog } from "@/features/transactions/components/Transactio
 import { TransactionFilters } from "@/features/transactions/components/TransactionFilters.tsx";
 import { useCreateTransaction } from "@/features/transactions/hooks/useCreateTransaction.ts";
 import { useDeleteTransaction } from "@/features/transactions/hooks/useDeleteTransaction.ts";
+import { useInfiniteTransactions } from "@/features/transactions/hooks/useInfiniteTransactions.ts";
 import { useTransactionFilters } from "@/features/transactions/hooks/useTransactionFilters";
 import { useUpdateTransaction } from "@/features/transactions/hooks/useUpdateTransaction.ts";
 import { api } from "@/lib/api";
@@ -26,17 +27,7 @@ export default function TransactionsPage() {
   const updateMutation = useUpdateTransaction();
   const deleteMutation = useDeleteTransaction();
 
-  const transactionsQuery = useQuery({
-    queryKey: queryKeys.transactions.list(filters),
-    queryFn: () =>
-      api.get<Transaction[]>(
-        `/transactions?${new URLSearchParams(
-          Object.entries(filters)
-            .filter(([, value]) => value !== undefined && value !== null && value !== "")
-            .map(([k, v]) => [k, String(v)]),
-        )}`,
-      ),
-  });
+  const transactionsQuery = useInfiniteTransactions(filters);
   const categoriesQuery = useQuery({
     queryKey: queryKeys.categories.all,
     queryFn: () => api.get<Category[]>("/categories"),
@@ -44,11 +35,21 @@ export default function TransactionsPage() {
 
   const isLoading = transactionsQuery.isLoading || categoriesQuery.isLoading;
   const isError = transactionsQuery.isError || categoriesQuery.isError;
-  const transactions = transactionsQuery.data ?? [];
+  const transactions = useMemo(
+    () => transactionsQuery.data?.pages.flatMap((p) => p.data) ?? [],
+    [transactionsQuery.data],
+  );
   const categories = categoriesQuery.data ?? [];
 
   const categoryMap = Object.fromEntries(categories.map((c) => [c.id, c]));
   const columns = useMemo(() => createTransactionColumns(categoryMap), [categoryMap]);
+
+  const { hasNextPage, isFetchingNextPage, fetchNextPage } = transactionsQuery;
+  const handleEndReached = useCallback(() => {
+    if (hasNextPage && !isFetchingNextPage) {
+      void fetchNextPage();
+    }
+  }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
 
   const handleSubmit = (values: TransactionInput) => {
     if (selectedTransaction) {
@@ -101,6 +102,7 @@ export default function TransactionsPage() {
         virtualized
         emptyMessage="No transactions yet."
         errorMessage={"Failed to load transactions."}
+        onEndReached={handleEndReached}
         onEdit={(transaction) => {
           setSelectedTransaction(transaction);
           setEditDialogOpen(true);

@@ -1,6 +1,6 @@
 import { useVirtualizer } from "@tanstack/react-virtual";
 import { Pencil, Trash2 } from "lucide-react";
-import { type ReactNode, useCallback, useRef } from "react";
+import { type ReactNode, useCallback, useEffect, useRef } from "react";
 import { useMemo, useState } from "react";
 
 import { Button } from "@/components/ui/button.tsx";
@@ -21,6 +21,7 @@ type VirtualDataTableProps<T extends { id: string | number }> = {
   columns: Column<T>[];
   onEdit: (row: T) => void;
   onDelete: (row: T) => void;
+  onEndReached?: () => void;
 };
 
 export function VirtualDataTable<T extends { id: string | number }>({
@@ -28,6 +29,7 @@ export function VirtualDataTable<T extends { id: string | number }>({
   columns,
   onEdit,
   onDelete,
+  onEndReached,
 }: VirtualDataTableProps<T>) {
   const [sort, setSort] = useState<SortState<T>>(null);
 
@@ -63,6 +65,14 @@ export function VirtualDataTable<T extends { id: string | number }>({
   });
 
   const virtualRows = rowVirtualizer.getVirtualItems();
+
+  const lastRow = virtualRows[virtualRows.length - 1];
+  useEffect(() => {
+    if (!onEndReached) return;
+    if (lastRow && lastRow.index >= sorted.length - 1) {
+      onEndReached();
+    }
+  }, [lastRow, sorted.length, onEndReached]);
 
   const paddingTop = virtualRows.length > 0 ? virtualRows[0].start : 0;
 

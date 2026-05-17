@@ -1,50 +1,60 @@
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { type InfiniteData, useMutation, useQueryClient } from "@tanstack/react-query";
 
 import { queryKeys } from "@/api/queryKeys.ts";
 import { api } from "@/lib/api.ts";
-import type { Transaction, TransactionInput } from "@/types/finance";
+import type { Transaction, TransactionInput, TransactionPage } from "@/types/finance";
 
 interface MutationContext {
-  previousData: Array<[readonly unknown[], Transaction[] | undefined]>;
+  previousData: Array<[readonly unknown[], InfiniteData<TransactionPage> | undefined]>;
 }
 
 export const useCreateTransaction = () => {
   const queryClient = useQueryClient();
 
   return useMutation<Transaction, Error, TransactionInput, MutationContext>({
-    mutationFn: async (newTransaction) => {
-      return await api.post<Transaction>(`/transactions/`, newTransaction);
-    },
+    mutationFn: (input) => api.post<Transaction>(`/transactions/`, input),
 
-    onMutate: async (newTransaction) => {
+    onMutate: async (input) => {
       await queryClient.cancelQueries({ queryKey: queryKeys.transactions.all });
 
-      const previousData = queryClient.getQueriesData<Transaction[]>({
-        queryKey: queryKeys.transactions.all,
+      const previousData = queryClient.getQueriesData<InfiniteData<TransactionPage>>({
+        queryKey: queryKeys.transactions.infinite,
       });
 
-      queryClient.setQueriesData<Transaction[]>({ queryKey: queryKeys.transactions.all }, (old) => {
-        const optimisticTx: Transaction = {
-          ...newTransaction,
-          id: "temp-id-" + Date.now(), // Placeholder ID
-          createdAt: new Date().toDateString(),
-          updatedAt: new Date().toDateString(),
-        };
-        return old ? [optimisticTx, ...old] : [optimisticTx];
-      });
+      const now = new Date().toISOString();
+      const optimistic: Transaction = {
+        ...input,
+        id: `temp-${crypto.randomUUID()}`,
+        createdAt: now,
+        updatedAt: now,
+      };
+
+      queryClient.setQueriesData<InfiniteData<TransactionPage>>(
+        { queryKey: queryKeys.transactions.infinite },
+        (old) => {
+          if (!old) return old;
+          const [firstPage, ...rest] = old.pages;
+          if (!firstPage) return old;
+          return {
+            ...old,
+            pages: [{ ...firstPage, data: [optimistic, ...firstPage.data] }, ...rest],
+          };
+        },
+      );
 
       return { previousData };
     },
 
-    onError: (_err, _deletedId, context) => {
+    onError: (_err, _input, context) => {
       if (!context) return;
-      context.previousData.forEach(([queryKey, data]) => {
-        queryClient.setQueryData(queryKey, data);
+      context.previousData.forEach(([key, data]) => {
+        queryClient.setQueryData(key, data);
       });
     },
 
     onSettled: () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.transactions.all });
+      queryClient.invalidateQueries({ queryKey: queryKeys.budgets.all });
     },
   });
 };
