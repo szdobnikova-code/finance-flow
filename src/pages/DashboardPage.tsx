@@ -64,8 +64,8 @@ export default function DashboardPage() {
     queryFn: () => api.get<Category[]>("/categories"),
   });
 
-  const transactions = transactionsQuery.data ?? [];
-  const categories = categoriesQuery.data ?? [];
+  const transactions = useMemo(() => transactionsQuery.data ?? [], [transactionsQuery.data]);
+  const categories = useMemo(() => categoriesQuery.data ?? [], [categoriesQuery.data]);
   const isLoading = transactionsQuery.isLoading || categoriesQuery.isLoading;
   const isError = transactionsQuery.isError || categoriesQuery.isError;
 
