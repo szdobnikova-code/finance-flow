@@ -25,7 +25,14 @@ export const useUpdateCategory = () => {
       });
 
       queryClient.setQueriesData<Category[]>({ queryKey: queryKeys.categories.all }, (old) =>
-        old?.filter((c) => c.id !== updateCategory.id),
+        old?.map((category) =>
+          category.id === updateCategory.id
+            ? {
+                ...category,
+                ...updateCategory,
+              }
+            : category,
+        ),
       );
 
       return { previousData };

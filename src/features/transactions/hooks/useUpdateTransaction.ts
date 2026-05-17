@@ -25,7 +25,15 @@ export const useUpdateTransaction = () => {
       });
 
       queryClient.setQueriesData<Transaction[]>({ queryKey: queryKeys.transactions.all }, (old) =>
-        old?.filter((t) => t.id !== updatedTransaction.id),
+        old?.map((transaction) =>
+          transaction.id === updatedTransaction.id
+            ? {
+                ...transaction,
+                ...updatedTransaction,
+                updatedAt: new Date().toISOString(),
+              }
+            : transaction,
+        ),
       );
 
       return { previousData };

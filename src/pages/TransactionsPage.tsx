@@ -32,7 +32,7 @@ export default function TransactionsPage() {
       api.get<Transaction[]>(
         `/transactions?${new URLSearchParams(
           Object.entries(filters)
-            .filter(([, v]) => !!v)
+            .filter(([, value]) => value !== undefined && value !== null && value !== "")
             .map(([k, v]) => [k, String(v)]),
         )}`,
       ),

@@ -21,15 +21,15 @@ See:
 
 ## Headline results
 
-| Metric                                          | Before    | After     | Δ             |
-| ------------------------------------------------| ----------| ----------| ------------- |
-| Sync-parsed entry JS (gz)                       | 336.25 KB | 41.29 KB  | **−87.7%**    |
-| First-visit `/dashboard` JS (gz)                | 579.67 KB | 497.57 KB | −14.2%        |
-| First-visit `/budgets` or `/categories` JS (gz) | 579.67 KB | ~199.7 KB | **−65.5%**    |
-| Demo MSW chunk (gz)                             | 243.42 KB | 88.46 KB  | **−63.7%**    |
-| Production MSW chunk                            | present   | removed   | eliminated    |
-| Faker in runtime bundle                         | yes       | no        | eliminated    |
-| Modules transformed                             | 3860      | 3544      | −316          |
+| Metric                                          | Before    | After     | Δ          |
+| ----------------------------------------------- | --------- | --------- | ---------- |
+| Sync-parsed entry JS (gz)                       | 336.25 KB | 41.29 KB  | **−87.7%** |
+| First-visit `/dashboard` JS (gz)                | 579.67 KB | 497.57 KB | −14.2%     |
+| First-visit `/budgets` or `/categories` JS (gz) | 579.67 KB | ~199.7 KB | **−65.5%** |
+| Demo MSW chunk (gz)                             | 243.42 KB | 88.46 KB  | **−63.7%** |
+| Production MSW chunk                            | present   | removed   | eliminated |
+| Faker in runtime bundle                         | yes       | no        | eliminated |
+| Modules transformed                             | 3860      | 3544      | −316       |
 
 ---
 
@@ -223,13 +223,13 @@ Tested scenarios:
 
 ## Render profiling results
 
-| Metric | Before | After | Δ |
-|--------|--------:|------:|--:|
-| VirtualDataTable render | ~68 ms | ~56 ms | **−17.6%** |
-| Scroll commits | higher spikes | lower spikes | improved |
-| Excessive row rerenders | observed | none significant | reduced |
-| Search update cost | low | low | stable |
-| Filter update cost | ~17 ms | ~17 ms | unchanged |
+| Metric                  |        Before |            After |          Δ |
+| ----------------------- | ------------: | ---------------: | ---------: |
+| VirtualDataTable render |        ~68 ms |           ~56 ms | **−17.6%** |
+| Scroll commits          | higher spikes |     lower spikes |   improved |
+| Excessive row rerenders |      observed | none significant |    reduced |
+| Search update cost      |           low |              low |     stable |
+| Filter update cost      |        ~17 ms |           ~17 ms |  unchanged |
 
 ---
 

@@ -24,8 +24,15 @@ export const useUpdateBudget = () => {
         queryKey: queryKeys.budgets.all,
       });
 
-      queryClient.setQueriesData<Budget[]>({ queryKey: queryKeys.transactions.all }, (old) =>
-        old?.filter((b) => b.id !== updatedBudget.id),
+      queryClient.setQueriesData<Budget[]>({ queryKey: queryKeys.budgets.all }, (old) =>
+        old?.map((budget) =>
+          budget.id === updatedBudget.id
+            ? {
+                ...budget,
+                ...updatedBudget,
+              }
+            : budget,
+        ),
       );
 
       return { previousData };
