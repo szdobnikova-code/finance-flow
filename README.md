@@ -155,6 +155,28 @@ Check formatting:
 npm run format:check
 ```
 
+## Testing
+
+Tests use Vitest with React Testing Library and live in `tests/unit/` (not co-located in `src/`).
+
+Watch mode for local development:
+
+```bash
+npm test
+```
+
+Single run (CI):
+
+```bash
+npm run test:run
+```
+
+With coverage report (HTML written to `coverage/`):
+
+```bash
+npm run test:coverage
+```
+
 ## Production Build
 
 Create a production build:

@@ -15,6 +15,9 @@ dist-ssr
 # Generated fixtures (created by scripts/generate-fixtures.ts during prebuild)
 public/fixtures/
 
+# Vitest coverage reports
+coverage/
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
