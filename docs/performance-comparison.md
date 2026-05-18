@@ -592,40 +592,76 @@ runs.
 
 ## Flame chart screenshots
 
-Capture matching before/after Chrome DevTools traces for the busiest route and
-save them alongside the Lighthouse reports:
+Chrome DevTools Performance traces captured against the production preview
+build, 4× CPU throttling, same scroll interaction on both sides
+(scroll a few rows down, scroll back to top). Before is `c4826c3` (the
+pre-Day-9 baseline); after is current `main`.
 
-- `docs/performance-before/flame-transactions.png`
-- `docs/performance-after/flame-transactions.png`
+### Before — `/transactions` on `c4826c3`
 
-Add equivalent screenshots for `/dashboard` and `/budgets` if their behavior
-also visibly changed.
+![Performance trace, /transactions, pre-optimization baseline](./performance-before/flame-transactions.png)
+
+### After — `/transactions` on `main`
+
+![Performance trace, /transactions, current main](./performance-after/flame-transactions.png)
+
+### What these traces actually show
+
+Both recordings used plain **Record**, not **Record and Reload**, so they
+capture **post-load scroll activity** rather than the initial page-load
+parse cost. Read that way:
+
+- **Before** — main thread is busy for ~1.5 s with the clustered render work
+  of the un-virtualized 10 k-row table, then idles for the remaining ~4 s.
+  Most of the pre-optimization cost — MSW boot, faker generation, monolithic
+  JS parse — happened *before* the recording started, so it doesn't appear
+  in this trace. 1st-party main-thread time inside the window: ~10 ms.
+- **After** — main thread shows continuous lightweight work throughout the
+  trace. That's virtualization doing its job: every scroll event re-renders
+  the visible row window. 1st-party main-thread time inside the window:
+  ~822 ms — higher than the before number, because the trace actually
+  captures the scroll-driven work that the before trace mostly missed.
+
+These PNGs are a **visual record of the runtime shape**, not a direct
+"look how much less work" demonstration. For that, look at the
+Lighthouse-driven LCP and TBT numbers in the tables above — those *are*
+captured page-load measurements (Lighthouse uses the equivalent of
+"Record and Reload"), and they tell the cleaner story.
+
+### Caveats baked into these specific PNGs
+
+- **Browser extensions stayed enabled.** Both traces show AdBlock Plus,
+  React DevTools, and TanStack Query DevTools in the 3rd-party rows of the
+  Summary panel. Cleaner traces would use an incognito window with
+  extensions disabled.
+- **Recording mode was Record, not Record and Reload.** The capture
+  procedure below has been updated to recommend Record and Reload for any
+  future re-captures.
 
 ### Capture procedure (do both halves the same way)
 
-1. Use the production preview build (`npm run build && npm run preview`), not
-   the dev server. If you need the mock API for the route to populate data,
-   run `npm run build:demo && npm run preview` instead — keep the choice
+1. Use the production preview build (`npm run build && npm run preview`).
+   For routes that need the mock API to populate, use
+   `npm run build:demo && npm run preview` instead — keep the choice
    consistent across before and after.
-2. Open the target route in **Chrome** (not Brave / Edge) at the same window
-   size each time — DevTools open as a docked panel, browser viewport roughly
-   1440×900.
-3. **DevTools → Performance** tab. Set **CPU throttling** to `4× slowdown` and
-   **Network throttling** to `Fast 3G`. These match across machines.
-4. Load the route against the **same dataset size** (10,000 transactions for
-   `/transactions`). Click **Start profiling and reload page**.
-5. Stop the recording once the route has rendered and the first interaction
-   (e.g. scroll a few rows or toggle a filter) has completed.
-6. Take a PNG screenshot of the Performance panel — `Cmd+Shift+4` on macOS to
-   capture the panel region. Optionally `Save profile…` to keep the raw
-   `.cpuprofile` next to the PNG for re-analysis.
-7. For the **before** capture, check out the baseline commit referenced in
-   `performance-before/metrics.md` (`git switch --detach <sha>`) and repeat
-   steps 1–6. For the **after** capture, run against current `main`.
-
-The goal is comparable traces — same route, same interaction, same dataset,
-same throttling — so any visible difference between PNGs reflects the
-optimization rather than environmental noise.
+2. Open Chrome **in an Incognito window** with extensions disabled (or
+   explicitly disable AdBlock / TanStack Query DevTools / React DevTools) so
+   third-party work doesn't show up in the trace.
+3. Open the target route at a consistent window size — DevTools docked,
+   browser viewport roughly 1440×900.
+4. **DevTools → Performance** tab. Set **CPU throttling** to `4× slowdown`
+   and **Network throttling** to `Fast 4G` (or `Fast 3G` on older Chrome).
+5. Load the route against the 10,000-row dataset. Click **Record and Reload**
+   (not plain Record), so the trace captures the full page-load cost.
+6. Stop the recording once the route has rendered and the first scroll /
+   filter interaction has completed.
+7. Screenshot the Performance panel — `Cmd+Shift+4` on macOS — covering the
+   same panel region for before and after. Optionally `Save profile…`
+   alongside the PNG to keep the raw trace for re-analysis.
+8. For the **before** capture, check out the baseline commit
+   (`git switch --detach c4826c3`) and rebuild
+   (`rm -rf dist && npm run build`) before repeating steps 1–7. For the
+   **after** capture, run against current `main`.
 
 ## Verification
 
