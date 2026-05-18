@@ -1,0 +1,22 @@
+Generated: 2026-05-18T07:20:46Z
+
+## dist/ assets (sorted by size)
+
+4.0K	dist/assets/DashboardCharts-Bmmm3q-S.js
+4.0K	dist/assets/Panel-CfJGhGTn.js
+4.0K	dist/assets/coerce-B7RGUEvP.js
+4.0K	dist/assets/rolldown-runtime-S-ySWqyJ.js
+8.0K	dist/assets/BudgetsPage-BpIyL74o.js
+8.0K	dist/assets/CategoriesPage-DvXT85HC.js
+8.0K	dist/assets/DashboardPage-wck78oNb.js
+8.0K	dist/assets/iconMap-pNHKTjek.js
+ 16K	dist/assets/api-DLjWoq0V.js
+ 36K	dist/assets/TransactionsPage-DcQ6EffF.js
+ 72K	dist/assets/index-uDd9oM64.css
+ 84K	dist/assets/useTransactionFilters-BN2Vh-td.js
+132K	dist/assets/index-eSsx7uSN.js
+148K	dist/assets/select-AJUksoZk.js
+312K	dist/assets/react-vendor-D8IHHMMU.js
+372K	dist/assets/recharts-C69A_7o-.js
+
+Total dist/: 5.6M
