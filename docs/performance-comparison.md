@@ -425,21 +425,29 @@ Measurements captured using:
 ## Goal
 
 Re-run Lighthouse against the same routes captured pre-optimization, record the
-post-change numbers per metric, and close the loop on Days 9–11. Numbers below
-are placeholders — fill them in after running the script.
+post-change numbers per metric, and close the loop on Days 9–11.
+
+## Methodology
+
+- All measurements run against demo build (`npm run build:demo`).
+- MSW provides 10,000 mock transactions for realistic load.
+- Standard production build is not measured because it lacks mock data.
+- Each route measured 3 times, median value reported.
+- Runner: `scripts/run-lighthouse-after.sh` (serves on
+  `http://localhost:4173` via `npm run preview`).
 
 ## How to reproduce
 
 From the repo root:
 
 ```bash
-bash scripts/run-lighthouse.sh
+bash scripts/run-lighthouse-after.sh
 ```
 
-The script builds the production bundle, serves it via `vite preview`, and
-writes one JSON Lighthouse report per route × form-factor under
-[`docs/performance-after/`](./performance-after/). It also drops a
-`bundle-sizes.txt` summary next to the reports.
+The script builds via `npm run build:demo`, serves it on port 4173, runs
+Lighthouse 3× per route × form-factor, and writes one median JSON report per
+combination under [`docs/performance-after/`](./performance-after/) (plus
+the raw runs under `runs/` and a `bundle-sizes.txt` summary).
 
 Baseline artifacts (screenshots + metrics captured before the Day 9–11 work)
 live in [`docs/performance-before/`](./performance-before/).
@@ -455,85 +463,51 @@ live in [`docs/performance-before/`](./performance-before/).
 - **Bundle size** — gzip-compressed initial JS for the route, read from
   `dist/stats.html` and the script's `bundle-sizes.txt`.
 
-### Build-mode caveat (important)
+## Results
 
-The Day 8 baseline in [`performance-before/metrics.md`](./performance-before/metrics.md)
-was captured against a **local dev build** (`npm run dev`), while the post-
-optimization runs hit a **production preview** (`npm run build && npm run preview`).
-A large part of the LCP/TBT delta therefore reflects "dev vs prod" as well as
-the actual optimizations. Where possible the narrative below separates the two.
+After cells are placeholders until the next run is completed; fill them
+in from the JSON reports under
+[`./performance-after/`](./performance-after/) (median-of-3 per
+route × form-factor). Before cells come from
+[`./performance-before/metrics.md`](./performance-before/metrics.md);
+`not captured` means no Day 8 baseline exists for that
+route + form-factor combination (the Day 8 run was single-pass,
+desktop-only, and didn't cover `/budgets`).
 
-### Status of the post-optimization runs
-
-All six JSON reports are in place under `docs/performance-after/`
-(Lighthouse 13.3.0, captured 2026-05-18 via `scripts/run-lighthouse.sh`).
-Numbers below come directly from those reports, rounded to the nearest ms.
-
-Mobile-row "Before" cells show `n/a (baseline)` because the Day 8 baseline
-did not split desktop / mobile — it captured a single Lighthouse run per
-route. The post-optimization mobile numbers are recorded as absolute values
-rather than deltas. `/budgets` had no Day 8 baseline at all, so the same
-treatment applies to both its form factors.
-
-## Results — /dashboard
-
-Source: baseline from `performance-before/metrics.md`; "after" from
-`performance-after/dashboard-{desktop,mobile}.json`.
-
-| Metric                | Before         | After    | Delta       | Improvement   |
-| --------------------- | -------------- | -------- | ----------- | ------------- |
-| LCP (desktop)         | 10,200 ms      | 615 ms   | −9,585 ms   | **−94.0%**    |
-| LCP (mobile)          | n/a (baseline) | 3,226 ms | —           | absolute      |
-| INP / TBT (desktop)   | 90 ms          | 0 ms     | −90 ms      | **−100%**     |
-| INP / TBT (mobile)    | n/a (baseline) | 0 ms     | —           | absolute      |
-| CLS (desktop)         | 0.002          | 0        | −0.002      | within noise  |
-| CLS (mobile)          | n/a (baseline) | 0        | —           | absolute      |
-| Performance (desktop) | 54             | 100      | +46         | **+85.2%**    |
-| Performance (mobile)  | n/a (baseline) | 89       | —           | absolute      |
-
-## Results — /transactions
-
-Source: baseline from `performance-before/metrics.md`; "after" from
-`performance-after/transactions-{desktop,mobile}.json`.
-
-| Metric                | Before         | After    | Delta       | Improvement   |
-| --------------------- | -------------- | -------- | ----------- | ------------- |
-| LCP (desktop)         | 10,200 ms      | 654 ms   | −9,546 ms   | **−93.6%**    |
-| LCP (mobile)          | n/a (baseline) | 3,341 ms | —           | absolute      |
-| INP / TBT (desktop)   | 120 ms         | 0 ms     | −120 ms     | **−100%**     |
-| INP / TBT (mobile)    | n/a (baseline) | 2 ms     | —           | absolute      |
-| CLS (desktop)         | 0              | 0        | 0           | unchanged     |
-| CLS (mobile)          | n/a (baseline) | 0        | —           | absolute      |
-| Performance (desktop) | 54             | 100      | +46         | **+85.2%**    |
-| Performance (mobile)  | n/a (baseline) | 87       | —           | absolute      |
-
-Sanity check from production (Day 9 Vercel measurement, `bundle.md`):
-LCP 2.07 s, INP 48 ms, CLS 0 — production hardware lands between the local
-desktop and mobile numbers above, which is the expected ordering.
-
-## Results — /budgets
-
-Source: no Day 8 baseline existed for `/budgets` — the table records absolute
-post-optimization numbers from
-`performance-after/budgets-{desktop,mobile}.json`. For context, compare them
-against the `/dashboard` row above (the closest baselined route).
-
-| Metric                | Before        | After    | Delta | Improvement |
-| --------------------- | ------------- | -------- | ----- | ----------- |
-| LCP (desktop)         | not captured  | 613 ms   | —     | absolute    |
-| LCP (mobile)          | not captured  | 2,890 ms | —     | absolute    |
-| INP / TBT (desktop)   | not captured  | 0 ms     | —     | absolute    |
-| INP / TBT (mobile)    | not captured  | 0 ms     | —     | absolute    |
-| CLS (desktop)         | not captured  | 0        | —     | absolute    |
-| CLS (mobile)          | not captured  | 0        | —     | absolute    |
-| Performance (desktop) | not captured  | 100      | —     | absolute    |
-| Performance (mobile)  | not captured  | 91       | —     | absolute    |
+| Route          | Metric                | Before        | After     | Delta | Improvement |
+| -------------- | --------------------- | ------------- | --------- | ----- | ----------- |
+| /dashboard     | LCP (desktop)         | 10,200 ms     | _pending_ | —     | —           |
+| /dashboard     | LCP (mobile)          | not captured  | _pending_ | —     | —           |
+| /dashboard     | INP / TBT (desktop)   | 90 ms         | _pending_ | —     | —           |
+| /dashboard     | INP / TBT (mobile)    | not captured  | _pending_ | —     | —           |
+| /dashboard     | CLS (desktop)         | 0.002         | _pending_ | —     | —           |
+| /dashboard     | CLS (mobile)          | not captured  | _pending_ | —     | —           |
+| /dashboard     | Performance (desktop) | 54            | _pending_ | —     | —           |
+| /dashboard     | Performance (mobile)  | not captured  | _pending_ | —     | —           |
+| /transactions  | LCP (desktop)         | 10,200 ms     | _pending_ | —     | —           |
+| /transactions  | LCP (mobile)          | not captured  | _pending_ | —     | —           |
+| /transactions  | INP / TBT (desktop)   | 120 ms        | _pending_ | —     | —           |
+| /transactions  | INP / TBT (mobile)    | not captured  | _pending_ | —     | —           |
+| /transactions  | CLS (desktop)         | 0             | _pending_ | —     | —           |
+| /transactions  | CLS (mobile)          | not captured  | _pending_ | —     | —           |
+| /transactions  | Performance (desktop) | 54            | _pending_ | —     | —           |
+| /transactions  | Performance (mobile)  | not captured  | _pending_ | —     | —           |
+| /budgets       | LCP (desktop)         | not captured  | _pending_ | —     | —           |
+| /budgets       | LCP (mobile)          | not captured  | _pending_ | —     | —           |
+| /budgets       | INP / TBT (desktop)   | not captured  | _pending_ | —     | —           |
+| /budgets       | INP / TBT (mobile)    | not captured  | _pending_ | —     | —           |
+| /budgets       | CLS (desktop)         | not captured  | _pending_ | —     | —           |
+| /budgets       | CLS (mobile)          | not captured  | _pending_ | —     | —           |
+| /budgets       | Performance (desktop) | not captured  | _pending_ | —     | —           |
+| /budgets       | Performance (mobile)  | not captured  | _pending_ | —     | —           |
 
 ## Bundle size (current production build)
 
-Numbers reproduced from
-[`performance-after/bundle.md`](./performance-after/bundle.md) so this section
-is self-contained.
+Bundle sizes are measured against the **production build** (`npm run build`)
+because that's what users actually download — the demo target used for the
+runtime metrics above ships MSW + fixtures that production doesn't include.
+The live source of truth is `dist/stats.html` (regenerated on every build);
+the table below pins the Day 9 numbers for at-a-glance comparison.
 
 | Bundle                                 | Before       | After        | Delta         | Improvement  |
 | -------------------------------------- | ------------ | ------------ | ------------- | ------------ |
@@ -545,57 +519,36 @@ is self-contained.
 | Production MSW chunk                   | present      | removed      | —             | eliminated   |
 | Modules transformed                    | 3,860        | 3,544        | −316          | −8.2%        |
 
-A `/transactions` first-visit total is not explicitly tabulated in `bundle.md`
-(the existing breakdown groups by chunk, not by route entry-point); fill it in
-from `dist/stats.html` after the next production build if a per-route figure is
+A `/transactions` first-visit total is not explicitly tabulated above (the
+breakdown groups by chunk, not by route entry-point); read it from
+`dist/stats.html` after the next production build if a per-route figure is
 needed.
 
 ## Narrative — what optimization moved each metric
 
-Across all six Lighthouse runs the desktop Performance score is **100/100**
-on every route; mobile scores cluster at **87–91**. Reading the audit-level
-deltas:
+_To be written after results are filled in. Skeleton:_
 
-- **LCP.** Desktop LCP dropped from the 10.2 s Day 8 baseline to 615 ms on
-  `/dashboard` and 654 ms on `/transactions` — roughly **−94%** in both
-  cases. `/budgets` (no baseline) lands at 613 ms desktop, in line with the
-  other two. Two effects stack here: the Day 8 baseline ran against a dev
-  build (no minification, no tree-shaking, MSW + faker loaded eagerly), while
-  the new runs hit the production build with the Day 9 splits in place —
-  route-level `React.lazy`, Recharts lazy-loaded behind a `Suspense`
-  boundary, MSW + faker removed from the production bundle entirely. Mobile
-  LCP is materially higher (2.9–3.3 s) because the slow-CPU emulation
-  amplifies any work on the parse path, but still well inside the
-  "needs-improvement" band (≤2.5 s good, ≤4 s needs-improvement) — `/budgets`
-  mobile at 2,890 ms is closest to the "good" edge; `/transactions` mobile
-  at 3,341 ms is the busiest route, which is expected with 10 k rows.
-- **TBT / INP.** Desktop TBT collapsed from 90 / 120 ms to **0 ms** on every
-  route; mobile is effectively the same (0 ms across `/dashboard` and
-  `/budgets`, 2 ms on `/transactions`). Drivers: smaller sync-parsed entry
-  bundle (336 KB gz → 41 KB gz, see the bundle table above), Day 10
-  virtualization of the transactions list, stabilised sort handlers with
-  `useCallback`, and the debounced search input. INP can't be lab-measured
-  directly, but the TBT proxy this low implies the main thread is no longer
-  the bottleneck.
-- **CLS.** Zero on every run (and 0.002 → 0 against the dashboard baseline,
-  i.e. within measurement noise). No layout-shift work was needed; the
-  shadcn primitives ship with stable reservations for their content.
-- **Performance score.** Desktop perfect across all three routes. Mobile
-  scores (87, 89, 91) are gated by the CPU-throttled LCP — there's no other
-  audit failing in the JSON. Bringing mobile LCP under 2.5 s on `/dashboard`
-  and `/transactions` would push the composite to ≥95.
-
-The Vercel production measurement after Day 9 (LCP 2.07 s, INP 48 ms, CLS 0
-on `/transactions`) sits between the local desktop and mobile numbers, which
-is the expected ordering and acts as a real-world sanity check on the lab
-runs.
+- **LCP** — _pending_. Expected drivers: route-level `React.lazy`,
+  Recharts lazy import behind a `Suspense` boundary, MSW + faker
+  removed from the production bundle (Day 9).
+- **TBT / INP** — _pending_. Expected drivers: smaller sync-parsed
+  entry bundle (Day 9), virtualization of the transactions list
+  (Day 10), stabilised sort handlers, debounced search.
+- **CLS** — _pending_. Expected: no change (shadcn primitives reserve
+  layout for their content).
+- **Performance score** — _pending_. Composite of the above; mobile
+  scores are gated by CPU-throttled LCP and the dashboard's Recharts
+  cost on initial paint.
 
 ## Flame chart screenshots
 
-Chrome DevTools Performance traces captured against the production preview
-build, 4× CPU throttling, same scroll interaction on both sides
-(scroll a few rows down, scroll back to top). Before is `c4826c3` (the
-pre-Day-9 baseline); after is current `main`.
+Two screenshots accompany the tables above, one per side, captured from
+Chrome DevTools' Performance panel:
+
+- `docs/performance-before/flame-transactions.png` — baseline trace,
+  captured before the Day 9–11 work landed.
+- `docs/performance-after/flame-transactions.png` — current `main`
+  trace, captured against the demo build.
 
 ### Before — `/transactions` on `c4826c3`
 
@@ -603,73 +556,68 @@ pre-Day-9 baseline); after is current `main`.
 
 ### After — `/transactions` on `main`
 
-![Performance trace, /transactions, current main](./performance-after/flame-transactions.png)
+![Performance trace, /transactions, current main, demo build](./performance-after/flame-transactions.png)
 
-### What these traces actually show
+### Equivalence rules (apply to both captures)
 
-Both recordings used plain **Record**, not **Record and Reload**, so they
-capture **post-load scroll activity** rather than the initial page-load
-parse cost. Read that way:
+For the comparison to be meaningful, both halves must match on:
 
-- **Before** — main thread is busy for ~1.5 s with the clustered render work
-  of the un-virtualized 10 k-row table, then idles for the remaining ~4 s.
-  Most of the pre-optimization cost — MSW boot, faker generation, monolithic
-  JS parse — happened *before* the recording started, so it doesn't appear
-  in this trace. 1st-party main-thread time inside the window: ~10 ms.
-- **After** — main thread shows continuous lightweight work throughout the
-  trace. That's virtualization doing its job: every scroll event re-renders
-  the visible row window. 1st-party main-thread time inside the window:
-  ~822 ms — higher than the before number, because the trace actually
-  captures the scroll-driven work that the before trace mostly missed.
+1. **Build target** — `npm run build:demo && npm run preview`, not the
+   dev server, not the standard production build. (MSW only loads
+   under the demo build, so this is also the only way to get the 10k
+   dataset client-side.)
+2. **Dataset size** — 10,000 transactions. `build:demo` wires this in
+   automatically via the pre-generated fixtures; no manual setup
+   needed.
+3. **Interaction** — the same scripted sequence in both runs (e.g.,
+   open `/transactions`, scroll one screenful, apply a filter, scroll
+   back). Note it in the commit message alongside the screenshot.
+4. **Environment** — same browser, same viewport (~1440×900),
+   incognito with extensions disabled, same CPU + network throttling
+   in the Performance panel.
 
-These PNGs are a **visual record of the runtime shape**, not a direct
-"look how much less work" demonstration. For that, look at the
-Lighthouse-driven LCP and TBT numbers in the tables above — those *are*
-captured page-load measurements (Lighthouse uses the equivalent of
-"Record and Reload"), and they tell the cleaner story.
+### Capture procedure
 
-### Caveats baked into these specific PNGs
-
-- **Browser extensions stayed enabled.** Both traces show AdBlock Plus,
-  React DevTools, and TanStack Query DevTools in the 3rd-party rows of the
-  Summary panel. Cleaner traces would use an incognito window with
-  extensions disabled.
-- **Recording mode was Record, not Record and Reload.** The capture
-  procedure below has been updated to recommend Record and Reload for any
-  future re-captures.
-
-### Capture procedure (do both halves the same way)
-
-1. Use the production preview build (`npm run build && npm run preview`).
-   For routes that need the mock API to populate, use
-   `npm run build:demo && npm run preview` instead — keep the choice
-   consistent across before and after.
+1. Build via `npm run build:demo` and serve with `npm run preview` so
+   the trace runs against the same data path Lighthouse measures.
 2. Open Chrome **in an Incognito window** with extensions disabled (or
-   explicitly disable AdBlock / TanStack Query DevTools / React DevTools) so
-   third-party work doesn't show up in the trace.
+   explicitly disable AdBlock / TanStack Query DevTools / React
+   DevTools) so third-party work doesn't show up in the trace.
 3. Open the target route at a consistent window size — DevTools docked,
    browser viewport roughly 1440×900.
-4. **DevTools → Performance** tab. Set **CPU throttling** to `4× slowdown`
-   and **Network throttling** to `Fast 4G` (or `Fast 3G` on older Chrome).
-5. Load the route against the 10,000-row dataset. Click **Record and Reload**
-   (not plain Record), so the trace captures the full page-load cost.
-6. Stop the recording once the route has rendered and the first scroll /
-   filter interaction has completed.
-7. Screenshot the Performance panel — `Cmd+Shift+4` on macOS — covering the
-   same panel region for before and after. Optionally `Save profile…`
-   alongside the PNG to keep the raw trace for re-analysis.
+4. **DevTools → Performance** tab. Set **CPU throttling** to
+   `4× slowdown` and **Network throttling** to `Fast 4G` (or `Fast 3G`
+   on older Chrome).
+5. Load the route against the 10,000-row dataset. Click **Record and
+   Reload** (not plain Record) so the trace captures the full
+   page-load cost.
+6. Stop the recording once the route has rendered and the planned
+   interaction sequence (rule 3 above) is complete.
+7. Screenshot the Performance panel — `Cmd+Shift+4` on macOS — covering
+   the same panel region for before and after. Optionally
+   `Save profile…` alongside the PNG to keep the raw trace for
+   re-analysis.
 8. For the **before** capture, check out the baseline commit
    (`git switch --detach c4826c3`) and rebuild
-   (`rm -rf dist && npm run build`) before repeating steps 1–7. For the
-   **after** capture, run against current `main`.
+   (`rm -rf dist && npm run build:demo`) before repeating steps 1–7.
+   For the **after** capture, run against current `main`.
 
 ## Verification
 
 Confirm before considering Day 12 done:
 
-- `bash scripts/run-lighthouse.sh` runs end-to-end without manual intervention
-- All six JSON reports exist under `docs/performance-after/` and are non-empty
+- `bash scripts/run-lighthouse-after.sh` runs end-to-end without manual
+  intervention.
+- The preview server returns a non-empty `/dashboard` body before
+  Lighthouse begins (the script's pre-flight check confirms this).
+- All six median JSON reports exist under `docs/performance-after/` and
+  are non-empty; raw runs are in `docs/performance-after/runs/`.
 - Each route's Lighthouse Performance score is ≥ the corresponding
-  baseline in `performance-before/`
-- Flame chart PNGs exist on both sides for at least `/transactions`
-- Every TBD in the tables above is replaced with a real number or `n/a`
+  baseline in `performance-before/`.
+- Every `_pending_` in the table above is replaced with a real number
+  or `n/a`.
+- Narrative section has been written from the filled-in numbers (not
+  the skeleton).
+- A flame-chart PNG exists for `/transactions` on at least one side
+- Every `_pending_` in the tables above is replaced with a real number
+  or `n/a`

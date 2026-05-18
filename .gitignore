@@ -18,6 +18,12 @@ public/fixtures/
 # Vitest coverage reports
 coverage/
 
+# Playwright MCP debug snapshots
+.playwright-mcp/
+
+# Personal prompt history scratch
+docs/promts-raw.txt
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
