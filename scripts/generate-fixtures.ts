@@ -1,6 +1,7 @@
-import { faker } from "@faker-js/faker";
 import { mkdir, writeFile } from "node:fs/promises";
 import { join } from "node:path";
+
+import { faker } from "@faker-js/faker";
 
 import type { Budget, Category, Transaction } from "../src/types/finance.ts";
 

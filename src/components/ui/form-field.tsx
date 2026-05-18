@@ -1,7 +1,8 @@
+import type { ReactNode } from "react";
+
 import { cn } from "@/lib/utils";
 
 import { formClasses } from "./form-shared";
-import type { ReactNode } from "react";
 
 interface FormFieldProps {
   label: string;
