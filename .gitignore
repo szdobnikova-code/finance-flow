@@ -18,6 +18,9 @@ public/fixtures/
 # Vitest coverage reports
 coverage/
 
+# Lighthouse CI local run artifacts
+.lighthouseci/
+
 # Playwright MCP debug snapshots
 .playwright-mcp/
 

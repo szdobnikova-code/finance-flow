@@ -191,6 +191,22 @@ Preview the production build locally:
 npm run preview
 ```
 
+## Performance
+
+[![Lighthouse CI](https://github.com/szdobnikova-code/finance-flow/actions/workflows/lighthouse-ci.yml/badge.svg)](https://github.com/szdobnikova-code/finance-flow/actions/workflows/lighthouse-ci.yml)
+
+Desktop median (Day 12, demo build with 10,000 mock transactions via MSW):
+
+| Route           | Performance | LCP   | TBT  | CLS |
+| --------------- | ----------- | ----- | ---- | --- |
+| `/dashboard`    | 99          | 669ms | 95ms | 0   |
+| `/transactions` | 99          | 796ms | 0ms  | 0   |
+| `/budgets`      | 100         | 660ms | 0ms  | 0   |
+
+Performance is measured against the demo build (`npm run build:demo`) with 10,000 mock transactions served by MSW. Running Lighthouse against the standard production build would serve an empty shell (no data source) and produce misleading scores. See [docs/performance-comparison.md](./docs/performance-comparison.md) for Day 8 → Day 12 before/after metrics and the optimization narrative.
+
+CI thresholds (desktop): performance ≥ 0.9, LCP ≤ 2s, TBT ≤ 300ms, CLS ≤ 0.1. Each PR runs Lighthouse 3× per route and asserts the median.
+
 ## Status
 
 This project is currently in MVP polish phase.
@@ -199,7 +215,6 @@ Planned next steps:
 
 - add baseline performance measurements
 - optimize bundle size and render performance
-- add Lighthouse CI
 - add selected unit and E2E tests
 - document before/after performance metrics
 
