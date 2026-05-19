@@ -91,9 +91,17 @@ The app includes responsive layouts for mobile, tablet, and desktop:
 
 ## AI-Assisted Development
 
-Claude Code was used throughout development for implementation, debugging, refactoring, and responsive UX polish.
+This project was built with Claude (via Claude Code) as the primary AI assistant. The AI workflow is intentionally documented as part of the project — not just to show that AI was used, but to demonstrate which prompting patterns produced measurable results.
 
-The AI workflow is intentionally documented as part of the project because the goal is not only to build a dashboard, but also to demonstrate practical AI-assisted frontend development.
+See [docs/ai-prompts.md](./docs/ai-prompts.md) for curated examples covering:
+
+- Architectural decisions (router choice with explicit trade-offs)
+- Complex refactors with measured impact (87% reduction in entry bundle)
+- Self-correction when methodology was wrong (Lighthouse build target)
+- CI/CD setup with threshold calibration
+- Structured feature work scoped to feature areas
+
+Each entry shows the prompt, the actual outcome with numbers, and the lesson learned.
 
 ## Project Structure
 
