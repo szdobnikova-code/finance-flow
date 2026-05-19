@@ -4,6 +4,14 @@ Optimization work is captured incrementally, with baselines stored in `performan
 
 The goal of this project was not only to improve Lighthouse scores but to identify, measure, and reduce real bottlenecks in bundle loading, rendering, runtime behavior, and data fetching.
 
+## Methodology
+
+- **Build target:** `npm run build:demo` (MSW enabled so 10,000 mock transactions are present client-side; the standard `npm run build` ships an empty shell and would produce misleading scores).
+- **Dataset:** 10,000 pre-generated transactions, materialized at build time by `scripts/generate-fixtures.ts`.
+- **Runs:** 3 per route × form-factor; median reported. Raw runs live in [`performance-after/runs/`](./performance-after/runs/), one median JSON per combination at [`performance-after/`](./performance-after/).
+- **Form factors:** desktop and mobile. The Day 8 baseline was single-pass, desktop-only, and did not cover `/budgets` — those cells are marked `not captured`.
+- **Lighthouse:** report version `13.3.0`, executed via [`scripts/run-lighthouse-after.sh`](../scripts/run-lighthouse-after.sh) against the `npm run preview` server on `http://localhost:4173`.
+
 ---
 
 # Day 9 — Bundle + runtime optimization
@@ -246,10 +254,10 @@ Query configuration:
 
 ```txt
 staleTime:
-0 → 5 min
+0 → 30s
 
 gcTime:
-added (30 min)
+added (5 min)
 
 refetchOnMount:
 true → false
@@ -474,32 +482,32 @@ route × form-factor). Before cells come from
 route + form-factor combination (the Day 8 run was single-pass,
 desktop-only, and didn't cover `/budgets`).
 
-| Route          | Metric                | Before        | After     | Delta | Improvement |
-| -------------- | --------------------- | ------------- | --------- | ----- | ----------- |
-| /dashboard     | LCP (desktop)         | 10,200 ms     | _pending_ | —     | —           |
-| /dashboard     | LCP (mobile)          | not captured  | _pending_ | —     | —           |
-| /dashboard     | INP / TBT (desktop)   | 90 ms         | _pending_ | —     | —           |
-| /dashboard     | INP / TBT (mobile)    | not captured  | _pending_ | —     | —           |
-| /dashboard     | CLS (desktop)         | 0.002         | _pending_ | —     | —           |
-| /dashboard     | CLS (mobile)          | not captured  | _pending_ | —     | —           |
-| /dashboard     | Performance (desktop) | 54            | _pending_ | —     | —           |
-| /dashboard     | Performance (mobile)  | not captured  | _pending_ | —     | —           |
-| /transactions  | LCP (desktop)         | 10,200 ms     | _pending_ | —     | —           |
-| /transactions  | LCP (mobile)          | not captured  | _pending_ | —     | —           |
-| /transactions  | INP / TBT (desktop)   | 120 ms        | _pending_ | —     | —           |
-| /transactions  | INP / TBT (mobile)    | not captured  | _pending_ | —     | —           |
-| /transactions  | CLS (desktop)         | 0             | _pending_ | —     | —           |
-| /transactions  | CLS (mobile)          | not captured  | _pending_ | —     | —           |
-| /transactions  | Performance (desktop) | 54            | _pending_ | —     | —           |
-| /transactions  | Performance (mobile)  | not captured  | _pending_ | —     | —           |
-| /budgets       | LCP (desktop)         | not captured  | _pending_ | —     | —           |
-| /budgets       | LCP (mobile)          | not captured  | _pending_ | —     | —           |
-| /budgets       | INP / TBT (desktop)   | not captured  | _pending_ | —     | —           |
-| /budgets       | INP / TBT (mobile)    | not captured  | _pending_ | —     | —           |
-| /budgets       | CLS (desktop)         | not captured  | _pending_ | —     | —           |
-| /budgets       | CLS (mobile)          | not captured  | _pending_ | —     | —           |
-| /budgets       | Performance (desktop) | not captured  | _pending_ | —     | —           |
-| /budgets       | Performance (mobile)  | not captured  | _pending_ | —     | —           |
+| Route          | Metric                | Before        | After     | Delta       | Improvement |
+| -------------- | --------------------- | ------------- | --------- | ----------- | ----------- |
+| /dashboard     | LCP (desktop)         | 10,200 ms     | 669 ms    | −9,531 ms   | **−93.4%**  |
+| /dashboard     | LCP (mobile)          | not captured  | 3,331 ms  | —           | —           |
+| /dashboard     | INP / TBT (desktop)   | 90 ms         | 95 ms     | +5 ms       | —           |
+| /dashboard     | INP / TBT (mobile)    | not captured  | 450 ms    | —           | —           |
+| /dashboard     | CLS (desktop)         | 0.002         | 0         | −0.002      | —           |
+| /dashboard     | CLS (mobile)          | not captured  | 0         | —           | —           |
+| /dashboard     | Performance (desktop) | 54            | 99        | +45         | **+83.3%**  |
+| /dashboard     | Performance (mobile)  | not captured  | 76        | —           | —           |
+| /transactions  | LCP (desktop)         | 10,200 ms     | 796 ms    | −9,404 ms   | **−92.2%**  |
+| /transactions  | LCP (mobile)          | not captured  | 3,516 ms  | —           | —           |
+| /transactions  | INP / TBT (desktop)   | 120 ms        | 0 ms      | −120 ms     | **−100%**   |
+| /transactions  | INP / TBT (mobile)    | not captured  | 2 ms      | —           | —           |
+| /transactions  | CLS (desktop)         | 0             | 0         | 0           | —           |
+| /transactions  | CLS (mobile)          | not captured  | 0         | —           | —           |
+| /transactions  | Performance (desktop) | 54            | 99        | +45         | **+83.3%**  |
+| /transactions  | Performance (mobile)  | not captured  | 86        | —           | —           |
+| /budgets       | LCP (desktop)         | not captured  | 660 ms    | —           | —           |
+| /budgets       | LCP (mobile)          | not captured  | 3,312 ms  | —           | —           |
+| /budgets       | INP / TBT (desktop)   | not captured  | 0 ms      | —           | —           |
+| /budgets       | INP / TBT (mobile)    | not captured  | 0 ms      | —           | —           |
+| /budgets       | CLS (desktop)         | not captured  | 0         | —           | —           |
+| /budgets       | CLS (mobile)          | not captured  | 0         | —           | —           |
+| /budgets       | Performance (desktop) | not captured  | 100       | —           | —           |
+| /budgets       | Performance (mobile)  | not captured  | 88        | —           | —           |
 
 ## Bundle size (current production build)
 
@@ -526,19 +534,13 @@ needed.
 
 ## Narrative — what optimization moved each metric
 
-_To be written after results are filled in. Skeleton:_
+**LCP (desktop: −93% on `/dashboard`, −92% on `/transactions`).** The single biggest driver is the Day 9 bundle work: route-level `React.lazy` in `src/router.tsx`, the dynamic Recharts import inside the dashboard (`src/pages/DashboardPage.tsx`), and removing MSW + faker from the production bundle. Sync-parsed entry JS dropped from 336 KB gz to 41 KB gz (−87.7%), so the browser stops blocking on parse before it has anything to paint. The first-visit JS for `/budgets` and `/categories` fell from ~580 KB gz to ~200 KB gz, which is why those routes converge on sub-700 ms desktop LCP without needing any feature-specific tuning.
 
-- **LCP** — _pending_. Expected drivers: route-level `React.lazy`,
-  Recharts lazy import behind a `Suspense` boundary, MSW + faker
-  removed from the production bundle (Day 9).
-- **TBT / INP** — _pending_. Expected drivers: smaller sync-parsed
-  entry bundle (Day 9), virtualization of the transactions list
-  (Day 10), stabilised sort handlers, debounced search.
-- **CLS** — _pending_. Expected: no change (shadcn primitives reserve
-  layout for their content).
-- **Performance score** — _pending_. Composite of the above; mobile
-  scores are gated by CPU-throttled LCP and the dashboard's Recharts
-  cost on initial paint.
+**TBT (desktop: −100% on `/transactions`, 0–2 ms steady across routes).** TBT collapses because the long task on initial paint disappears once the rendered DOM is bounded. The transactions table virtualises through `src/components/VirtualDataTable.tsx` (TanStack Virtual), so 10,000 rows no longer translate into 10,000 React commits on mount. Day 10 also stabilised the sort handlers with `useCallback` and confirmed the search debounce keeps keystrokes from cascading into row work. The one anomaly is `/dashboard` desktop TBT 90 ms → 95 ms — within run-to-run noise, not a regression to chase.
+
+**CLS.** Unchanged at ~0 across both halves of the comparison. shadcn primitives reserve layout for their content and the dashboard charts mount into pre-sized containers, so there was no shift to remove.
+
+**Performance score.** The composite (54 → 99–100 desktop) tracks the LCP and TBT wins above. Mobile scores are intentionally lower (dashboard 76, transactions 86, budgets 88) because Lighthouse's mobile preset throttles CPU to ~4× and network to slow 4G, which pushes LCP into the 3 s range — especially on `/dashboard`, where Recharts has to mount before the chart paints. That's the realistic ceiling for an MSW-backed demo on throttled mobile; further improvement would require streaming the first chart payload or replacing Recharts on mobile, both of which are out of scope for this project.
 
 ## Flame chart screenshots
 

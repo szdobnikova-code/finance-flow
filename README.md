@@ -195,28 +195,38 @@ npm run preview
 
 [![Lighthouse CI](https://github.com/szdobnikova-code/finance-flow/actions/workflows/lighthouse-ci.yml/badge.svg)](https://github.com/szdobnikova-code/finance-flow/actions/workflows/lighthouse-ci.yml)
 
-Desktop median (Day 12, demo build with 10,000 mock transactions via MSW):
+Local measurements on typical user hardware. CI assertions are deliberately looser to account for shared GitHub runner variability — local numbers reflect real user conditions.
 
-| Route           | Performance | LCP   | TBT  | CLS |
-| --------------- | ----------- | ----- | ---- | --- |
-| `/dashboard`    | 99          | 669ms | 95ms | 0   |
-| `/transactions` | 99          | 796ms | 0ms  | 0   |
-| `/budgets`      | 100         | 660ms | 0ms  | 0   |
+### Transactions page (10,000 rows, desktop)
 
-Performance is measured against the demo build (`npm run build:demo`) with 10,000 mock transactions served by MSW. Running Lighthouse against the standard production build would serve an empty shell (no data source) and produce misleading scores. See [docs/performance-comparison.md](./docs/performance-comparison.md) for Day 8 → Day 12 before/after metrics and the optimization narrative.
+| Metric              | Before     | After   | Improvement |
+| ------------------- | ---------- | ------- | ----------- |
+| Performance score   | 54         | 99      | +83%        |
+| LCP                 | 10.2s      | 0.8s    | −92%        |
+| TBT                 | 120ms      | 0ms     | −100%       |
+| CLS                 | 0          | 0       | —           |
+| Bundle (initial JS) | 336KB gz   | 41KB gz | −88%        |
+
+Key optimizations:
+
+- Code splitting per route (`React.lazy` in `src/router.tsx`)
+- Dynamic Recharts import (~150kb deferred from initial bundle)
+- TanStack Virtual for transactions list (10k+ rows render in viewport)
+- Cursor-based pagination via `useInfiniteQuery` (50 per page)
+- Memoized derived data (filter computations, dashboard stats)
+
+Performance is measured against the demo build (`npm run build:demo`) with 10,000 mock transactions served by MSW. Running Lighthouse against the standard production build would serve an empty shell (no data source) and produce misleading scores. See [docs/performance-comparison.md](./docs/performance-comparison.md) for full methodology and raw reports across all routes and form factors.
 
 CI thresholds (desktop): performance ≥ 0.9, LCP ≤ 2s, TBT ≤ 300ms, CLS ≤ 0.1. Each PR runs Lighthouse 3× per route and asserts the median.
 
 ## Status
 
-This project is currently in MVP polish phase.
+- ✅ Week 1: MVP complete (CRUD, filters, charts, dark mode, responsive)
+- ✅ Week 2: Performance optimization complete (virtualization, code splitting, dynamic chart loading, optimistic mutations)
+- ✅ Lighthouse CI live with PR comments and performance budgets
+- ✅ Test coverage: 21 unit tests across critical paths
 
-Planned next steps:
-
-- add baseline performance measurements
-- optimize bundle size and render performance
-- add selected unit and E2E tests
-- document before/after performance metrics
+Feature-complete for portfolio purposes. See [docs/performance-comparison.md](./docs/performance-comparison.md) for before/after metrics.
 
 ## License
 

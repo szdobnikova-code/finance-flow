@@ -27,6 +27,11 @@ coverage/
 # Personal prompt history scratch
 docs/promts-raw.txt
 
+# Local env files (use .env.example as the template)
+.env
+.env.local
+.vercel
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
