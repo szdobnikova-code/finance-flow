@@ -238,4 +238,4 @@ Feature-complete for portfolio purposes. See [docs/performance-comparison.md](./
 
 ## License
 
-MIT
+[MIT](./LICENSE)
